@@ -43,11 +43,7 @@ import java.util.concurrent.Executor;
 
 public class XiaomiGateway {
     private static final String TAG = "XiaomiGateway";
-//    private static final String GROUP = "192.168.0.224";
     private static final String GROUP = "224.0.0.50";
-//    private static final String GROUP = "224.0.0.251";
-//    public static final String AQARA_IP = "58.151.219.141";
-    public static final String AQARA_IP = "192.168.0.42";
     private static final int PORT = 9898;
     private static final int PORT_DISCOVERY = 4321;
     private static final byte[] IV =
@@ -65,47 +61,32 @@ public class XiaomiGateway {
     private XiaomiGatewayIlluminationSensor builtinIlluminationSensor;
     private Map<String, SlaveDevice> knownDevices = new HashMap<>();
     private boolean continueReceivingUpdates;
-
-    private String mSendWhois = null;
-    private String mReplyWhois = null;
+    private WhoisReply mWhoisReply;
 
     public static XiaomiGateway discover() throws IOException, XaapiException {
         // TODO discover more than one gateway
         DirectChannel discoveryChannel = new DirectChannel(GROUP, PORT_DISCOVERY);
         WhoisCommand cmd = new WhoisCommand();
-        Log.d(TAG, "discover - sending ... : " + cmd.getString());
+        Log.d(TAG, "discover - sending ... " + cmd.getString());
         discoveryChannel.send(cmd.toBytes());
-        Log.d(TAG, "discover - send : " + cmd.getString());
-
-        Log.d(TAG, "discover - replying ... : ");
+        Log.d(TAG, "discover - replying ... ");
         String replyString = new String(discoveryChannel.receive());
-
         WhoisReply reply = GSON.fromJson(replyString, WhoisReply.class);
         Log.d(TAG, "discover - reply model: " + reply.model + " ip: " + reply.ip + " port: " + reply.port);
         if(Integer.parseInt(reply.port) != PORT) {
             throw new XaapiException("Gateway occupies unexpected port: " + reply.port);
         }
 
-        XiaomiGateway gateway = new XiaomiGateway(reply.ip);
-        gateway.setSendWhois(cmd.getString());
-        gateway.setReplyWhois(replyString);
-        return gateway;
+        return new XiaomiGateway(reply);
     }
 
-    public void setSendWhois(String sendWhois) {
-        this.mSendWhois = sendWhois;
-    }
 
-    public void setReplyWhois(String replyWhois) {
-        this.mReplyWhois = replyWhois;
-    }
-
-    public String getSendWhois() {
-        return mSendWhois;
-    }
-
-    public String getReplyWhois() {
-        return mReplyWhois;
+    public XiaomiGateway(WhoisReply reply) throws IOException, XaapiException{
+        this.mWhoisReply = reply;
+        this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
+        this.directChannel = new DirectChannel(reply.ip, PORT);
+        queryDevices();
+        configureBuiltinDevices();
     }
 
     public XiaomiGateway(String ip) throws IOException, XaapiException {
@@ -154,8 +135,6 @@ public class XiaomiGateway {
             GetIdListCommand queryDeviceString = new GetIdListCommand();
             Log.d(TAG, "queryDevices - sending ... : " + queryDeviceString.getCmdString());
             directChannel.send(queryDeviceString.toBytes());
-            Log.d(TAG, "queryDevices - send : " + queryDeviceString.getCmdString());
-
             Log.d(TAG, "queryDevices - receiving ... : ");
             String replyString = new String(directChannel.receive());
             Log.d(TAG, "queryDevices - received : " + replyString);
@@ -239,6 +218,7 @@ public class XiaomiGateway {
             directChannel.send(new ReadCommand(sid).toBytes());
             String replyString = new String(directChannel.receive());
             ReadReply reply = GSON.fromJson(replyString, ReadReply.class);
+            Log.d(TAG, "readDevice - sid: " + sid + " model: " + reply.model);
 
             switch(reply.model) {
                 case "cube":
