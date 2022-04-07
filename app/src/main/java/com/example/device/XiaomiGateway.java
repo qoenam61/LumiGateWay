@@ -85,8 +85,11 @@ public class XiaomiGateway {
         this.mWhoisReply = reply;
         this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
         this.directChannel = new DirectChannel(reply.ip, PORT);
+        Log.d(TAG, "XiaomiGateway: 1");
         queryDevices();
+        Log.d(TAG, "XiaomiGateway: 2");
         configureBuiltinDevices();
+        Log.d(TAG, "XiaomiGateway: 3");
     }
 
     public XiaomiGateway(String ip) throws IOException, XaapiException {
@@ -242,7 +245,9 @@ public class XiaomiGateway {
                     button.update(reply.data);
                     return button;
                 default:
-                    throw new XaapiException("Unsupported device model: " + reply.model);
+                    DefaultSlaveDevice defaultSlaveDevice = new DefaultSlaveDevice(this, sid);
+                    return defaultSlaveDevice;
+//                    throw new XaapiException("Unsupported device model: " + reply.model);
             }
         } catch (IOException e) {
             throw new XaapiException("Unable to query device " + sid + ": " + e.getMessage());

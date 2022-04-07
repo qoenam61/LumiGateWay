@@ -19,37 +19,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Run"/>
+            android:text="Search Devices"/>
 
         <View
             android:layout_width="10dp"
-            android:layout_height="50dp"/>
+            android:layout_height="20dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send Packet :"/>
-        <TextView
-            android:id="@+id/send_packet"
-            android:layout_width="300dp"
-            android:layout_height="50dp"
-            android:padding="10dp"
-            android:background="@android:color/darker_gray"/>
-
-        <View
-            android:layout_width="10dp"
-            android:layout_height="50dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
+            android:text="List devices :"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_read_device"
+            android:layout_width="370dp"
             android:layout_height="wrap_content"
-            android:text="Recv Packet :"/>
-        <TextView
-            android:id="@+id/recv_packet"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
-            android:padding="10dp"
-            android:background="@android:color/darker_gray"/>
+            android:minHeight="100dp"
+            android:background="@android:color/darker_gray">
+
+        </androidx.recyclerview.widget.RecyclerView>
     </LinearLayout>
 
 

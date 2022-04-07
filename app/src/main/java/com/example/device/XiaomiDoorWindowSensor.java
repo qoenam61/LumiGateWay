@@ -1,5 +1,7 @@
 package com.example.device;
 
+import android.util.Log;
+
 import com.example.XaapiException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class XiaomiDoorWindowSensor extends SlaveDevice implements IInteractiveDevice {
+    private static final String TAG = "XiaomiDoorWindowSensor";
 
     public enum Action {
         Open,
@@ -36,13 +39,14 @@ public class XiaomiDoorWindowSensor extends SlaveDevice implements IInteractiveD
                         lastAction = Action.Close;
                         break;
                     default:
-                        throw new XaapiException("Unexpected action: " + action);
+                        Log.d(TAG, "Unexpected action: " + action);
+//                        throw new XaapiException("Unexpected action: " + action);
                 }
                 notifyWithAction(action);
             }
-        } catch (XaapiException e) {
+        }/* catch (XaapiException e) {
             e.printStackTrace();
-        } catch (JsonSyntaxException e) {
+        } */catch (JsonSyntaxException e) {
             e.printStackTrace();
         }
     }

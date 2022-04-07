@@ -10,7 +10,8 @@ public abstract class SlaveDevice {
         XiaomiDoorWindowSensor,
         XiaomiSocket,
         XiaomiMotionSensor,
-        XiaomiSwitchButton
+        XiaomiSwitchButton,
+        Others
     }
 
     protected static JsonParser JSON_PARSER = new JsonParser();
