@@ -20,8 +20,6 @@ import com.example.reply.WhoisReply;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import org.json.JSONObject;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -29,7 +27,6 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -63,6 +60,12 @@ public class XiaomiGateway {
     private boolean continueReceivingUpdates;
     private WhoisReply mWhoisReply;
 
+    public interface onFoundSubDevice {
+        void onSubDevice(String sid, SlaveDevice deviceInfo);
+    }
+
+    private onFoundSubDevice mSubDeviceListener;
+
     public static XiaomiGateway discover() throws IOException, XaapiException {
         // TODO discover more than one gateway
         DirectChannel discoveryChannel = new DirectChannel(GROUP, PORT_DISCOVERY);
@@ -80,16 +83,42 @@ public class XiaomiGateway {
         return new XiaomiGateway(reply);
     }
 
+    public static XiaomiGateway discover(onFoundSubDevice listener) throws IOException, XaapiException {
+        // TODO discover more than one gateway
+        DirectChannel discoveryChannel = new DirectChannel(GROUP, PORT_DISCOVERY);
+        WhoisCommand cmd = new WhoisCommand();
+        Log.d(TAG, "discover - sending ... " + cmd.getString());
+        discoveryChannel.send(cmd.toBytes());
+        Log.d(TAG, "discover - replying ... ");
+        String replyString = new String(discoveryChannel.receive());
+        WhoisReply reply = GSON.fromJson(replyString, WhoisReply.class);
+        Log.d(TAG, "discover - reply model: " + reply.model + " ip: " + reply.ip + " port: " + reply.port);
+        if(Integer.parseInt(reply.port) != PORT) {
+            throw new XaapiException("Gateway occupies unexpected port: " + reply.port);
+        }
+
+        return new XiaomiGateway(reply, listener);
+    }
 
     public XiaomiGateway(WhoisReply reply) throws IOException, XaapiException{
         this.mWhoisReply = reply;
         this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
         this.directChannel = new DirectChannel(reply.ip, PORT);
-        Log.d(TAG, "XiaomiGateway: 1");
+        Log.d(TAG, "XiaomiGateway: queryDevices");
         queryDevices();
-        Log.d(TAG, "XiaomiGateway: 2");
+        Log.d(TAG, "XiaomiGateway: configureBuiltinDevices");
         configureBuiltinDevices();
-        Log.d(TAG, "XiaomiGateway: 3");
+    }
+
+    public XiaomiGateway(WhoisReply reply, onFoundSubDevice listener) throws IOException, XaapiException{
+        mSubDeviceListener = listener;
+        this.mWhoisReply = reply;
+        this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
+        this.directChannel = new DirectChannel(reply.ip, PORT);
+        Log.d(TAG, "XiaomiGateway: queryDevices");
+        queryDevices();
+        Log.d(TAG, "XiaomiGateway: configureBuiltinDevices");
+        configureBuiltinDevices();
     }
 
     public XiaomiGateway(String ip) throws IOException, XaapiException {
@@ -109,6 +138,10 @@ public class XiaomiGateway {
 
     public Map<String, SlaveDevice> getKnownDevices() {
         return knownDevices;
+    }
+
+    public void setOnSubDevicesListener(onFoundSubDevice listener) {
+        mSubDeviceListener = listener;
     }
 
     private void configureBuiltinDevices() {
@@ -145,7 +178,9 @@ public class XiaomiGateway {
             GetIdListReply reply = GSON.fromJson(replyString, GetIdListReply.class);
             sid = reply.sid;
             for(String sid : GSON.fromJson(reply.data, String[].class)) {
-                knownDevices.put(sid, readDevice(sid));
+                SlaveDevice device = readDevice(sid);
+                knownDevices.put(sid, device);
+                mSubDeviceListener.onSubDevice(sid, device);
             }
         } catch (IOException e) {
             throw new XaapiException("Unable to query devices: " + e.getMessage());
@@ -221,7 +256,7 @@ public class XiaomiGateway {
             directChannel.send(new ReadCommand(sid).toBytes());
             String replyString = new String(directChannel.receive());
             ReadReply reply = GSON.fromJson(replyString, ReadReply.class);
-            Log.d(TAG, "readDevice - sid: " + sid + " model: " + reply.model);
+            Log.d(TAG, "readDevice - sid: " + sid + " model: " + reply.model + " short_id: " + reply.short_id + " data: " + reply.data);
 
             switch(reply.model) {
                 case "cube":
@@ -244,6 +279,18 @@ public class XiaomiGateway {
                     XiaomiSwitchButton button = new XiaomiSwitchButton(this, sid);
                     button.update(reply.data);
                     return button;
+                case "sensor_ht":
+                    DefaultSlaveDevice sensorHT = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Sensor_HT);
+                    return sensorHT;
+                case "sensor_motion.aq2":
+                    DefaultSlaveDevice sensorMotionAq2 = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Sensor_Motion_AQ2);
+                    return sensorMotionAq2;
+                case "weather.v1":
+                    DefaultSlaveDevice weatherV1 = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Weather_V1);
+                    return weatherV1;
+                case "ctrl_neutral1":
+                    DefaultSlaveDevice ctrlNeutral1 = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Ctrl_Neutral1);
+                    return ctrlNeutral1;
                 default:
                     DefaultSlaveDevice defaultSlaveDevice = new DefaultSlaveDevice(this, sid);
                     return defaultSlaveDevice;

@@ -5,7 +5,7 @@ import java.net.*;
 
 public class IncomingMulticastChannel {
 
-    private static final int SOCKET_TIMEOUT = 1000; // milliseconds
+    private static final int SOCKET_TIMEOUT = 5000; // milliseconds
 
     private int port;
     private MulticastSocket socket;

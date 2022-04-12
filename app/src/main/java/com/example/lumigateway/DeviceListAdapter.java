@@ -13,10 +13,10 @@ import java.util.ArrayList;
 
 public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.DeviceListHolder> {
 
-    private ArrayList<SlaveDevice> mDeviceList;
+    private ArrayList<SlaveDevice> mDeviceList = new ArrayList<>();
 
-    public void setDeviceList(ArrayList<SlaveDevice> deviceList) {
-        this.mDeviceList = deviceList;
+    public void addDeviceList(SlaveDevice deviceInfo) {
+        this.mDeviceList.add(deviceInfo);
     }
 
     @Override

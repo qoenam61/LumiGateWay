@@ -17,7 +17,6 @@ public class DefaultSlaveDevice extends SlaveDevice {
         super(gateway, sid, Type.Others);
     }
 
-
     @Override
     void update(String data) {
         try {

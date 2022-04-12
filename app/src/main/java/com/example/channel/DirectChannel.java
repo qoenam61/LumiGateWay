@@ -8,7 +8,7 @@ import java.net.*;
 public class DirectChannel {
     private static final String TAG = "DirectChannel";
 
-    private static final int SOCKET_TIMEOUT = 60000; // milliseconds
+    private static final int SOCKET_TIMEOUT = 15000; // milliseconds
 
     private String ip;
     private int port;

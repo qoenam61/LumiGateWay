@@ -1,18 +1,12 @@
 package com.example.lumigateway;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.example.XaapiException;
 import com.example.device.SlaveDevice;
@@ -20,7 +14,6 @@ import com.example.device.XiaomiGateway;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -44,16 +37,17 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "onCreate: discover");
 
                     // Device Query Test 실행 코드
-                    XiaomiGateway gateway = XiaomiGateway.discover();
-                    Map<String, SlaveDevice> map = gateway.getKnownDevices();
-                    ArrayList<SlaveDevice> list = new ArrayList<>(map.values());
-                    Log.d(TAG, "[DEBUG] onCreate - list.size(): " + list.size());
-
-                    runOnUiThread(new Runnable() {
+                    XiaomiGateway gateway = XiaomiGateway.discover(new XiaomiGateway.onFoundSubDevice() {
                         @Override
-                        public void run() {
-                            mAdapter.setDeviceList(list);
-                            mAdapter.notifyDataSetChanged();
+                        public void onSubDevice(String sid, SlaveDevice deviceInfo) {
+                            Log.d(TAG, "[DEBUG] onSubDevice - sid: " + sid);
+                            mAdapter.addDeviceList(deviceInfo);
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                            });
                         }
                     });
 

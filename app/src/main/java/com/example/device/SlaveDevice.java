@@ -11,6 +11,10 @@ public abstract class SlaveDevice {
         XiaomiSocket,
         XiaomiMotionSensor,
         XiaomiSwitchButton,
+        Sensor_HT,
+        Sensor_Motion_AQ2,
+        Weather_V1,
+        Ctrl_Neutral1,
         Others
     }
 
