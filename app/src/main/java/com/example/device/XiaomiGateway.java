@@ -60,6 +60,8 @@ public class XiaomiGateway {
     private boolean continueReceivingUpdates;
     private WhoisReply mWhoisReply;
 
+    private boolean TEST_FOR_APP_DEV = true;
+
     public interface onFoundSubDevice {
         void onSubDevice(String sid, SlaveDevice deviceInfo);
     }
@@ -182,6 +184,14 @@ public class XiaomiGateway {
                 knownDevices.put(sid, device);
                 mSubDeviceListener.onSubDevice(sid, device);
             }
+
+            //TEST CODE
+            if (TEST_FOR_APP_DEV) {
+                Log.d(TAG, "[TEST_FOR_APP_DEV] queryDevices: testXiaomiSocket");
+                SlaveDevice device = testXiaomiSocket();
+                knownDevices.put("123456789", device);
+                mSubDeviceListener.onSubDevice("123456789", device);
+            }
         } catch (IOException e) {
             throw new XaapiException("Unable to query devices: " + e.getMessage());
         }
@@ -227,12 +237,17 @@ public class XiaomiGateway {
     void sendDataToDevice(SlaveDevice device, JsonObject data) throws XaapiException {
         if(key.isPresent()) {
             try {
-                directChannel.send(new WriteCommand(device, data, key.get()).toBytes());
+                WriteCommand command = new WriteCommand(device, data, key.get());
+                Log.d(TAG, "sendDataToDevice - sid: " +device.getSid() + " type: " + device.getType().name() + " data: " + command.getString());
+                directChannel.send(command.toBytes());
                 // TODO add handling for expired key
             } catch (IOException e) {
                 throw new XaapiException("Network error: " + e.getMessage());
             }
         } else {
+            if (TEST_FOR_APP_DEV) {
+                Log.d(TAG, "[TEST_FOR_APP_DEV] sendDataToDevice - sid: " +device.getSid() + " type: " + device.getType().name() + " data: " );
+            }
             throw new XaapiException("Unable to control device without a key. Did you forget to set a password?");
         }
     }
@@ -249,6 +264,10 @@ public class XiaomiGateway {
         } else {
             throw new XaapiException("Unable to control device without a key. Did you forget to set a password?");
         }
+    }
+
+    public SlaveDevice testXiaomiSocket() {
+        return new XiaomiSocket(this, sid);
     }
 
     private SlaveDevice readDevice(String sid) throws XaapiException {

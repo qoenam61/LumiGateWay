@@ -4,13 +4,19 @@ import java.nio.charset.StandardCharsets;
 
 public class ReadCommand implements ICommand {
     private String sid;
+    private String read;
 
     public ReadCommand(String sid) {
         this.sid = sid;
+        read = new String("{\"cmd\":\"read\", \"sid\":\""+ sid +"\"}");
     }
 
     @Override
     public byte[] toBytes() {
-        return new String("{\"cmd\":\"read\", \"sid\":\""+ sid +"\"}").getBytes(StandardCharsets.US_ASCII);
+        return read.getBytes(StandardCharsets.US_ASCII);
+    }
+
+    public String getString() {
+        return read;
     }
 }

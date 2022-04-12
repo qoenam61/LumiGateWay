@@ -10,6 +10,7 @@ import android.widget.Button;
 
 import com.example.XaapiException;
 import com.example.device.XiaomiGateway;
+import com.example.device.XiaomiSocket;
 
 import java.io.IOException;
 
@@ -51,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
                             mSubDeviceAdapter.notifyDataSetChanged();
                         });
                     });
-
 
                 } catch (IOException e) {
                     Log.d(TAG, "onCreate: IOException", e);

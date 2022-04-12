@@ -8,16 +8,21 @@ import java.nio.charset.StandardCharsets;
 public class WriteSelfCommand implements ICommand {
     private XiaomiGateway gateway;
     private JsonObject data;
+    String what;
 
     public WriteSelfCommand(XiaomiGateway gateway, JsonObject data, String key) {
         this.gateway = gateway;
         this.data = data;
+        what = "{{\"cmd\":\"write\", \"sid\":\""+ gateway.getSid() +"\", \"data\":" + data + "}}";
         data.addProperty("key", key);
     }
 
     @Override
     public byte[] toBytes() {
-        String what = "{{\"cmd\":\"write\", \"sid\":\""+ gateway.getSid() +"\", \"data\":" + data + "}}";
         return what.getBytes(StandardCharsets.US_ASCII);
+    }
+
+    public String getString() {
+        return what;
     }
 }

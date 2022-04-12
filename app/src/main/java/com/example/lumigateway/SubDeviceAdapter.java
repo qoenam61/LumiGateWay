@@ -39,6 +39,7 @@ public class SubDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        Log.d(TAG, "onBindViewHolder: ");
         SlaveDevice device = mDeviceList.get(position);
         if (holder instanceof SmartPlugViewHolder) {
             ((SmartPlugViewHolder)holder).onBind(device);
@@ -72,22 +73,18 @@ public class SubDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     class SmartPlugViewHolder extends RecyclerView.ViewHolder {
         Button buttonOn;
         Button buttonOff;
+        XiaomiSocket socket;
 
         public SmartPlugViewHolder(View itemView) {
             super(itemView);
             buttonOn = itemView.findViewById(R.id.device_smart_plug_on);
             buttonOff = itemView.findViewById(R.id.device_smart_plug_off);
-        }
-
-        void onBind(SlaveDevice device) {
-
-            XiaomiSocket socket = (XiaomiSocket)device;
-
             buttonOn.setOnClickListener(v -> {
                 try {
                     Log.d(TAG, "onClick: turnOn");
                     socket.turnOn();
                 } catch (XaapiException e) {
+                    Log.e(TAG, "onBind: ", e);
                     e.printStackTrace();
                 }
             });
@@ -97,9 +94,14 @@ public class SubDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                     Log.d(TAG, "onClick: turnOff");
                     socket.turnOff();
                 } catch (XaapiException e) {
+                    Log.e(TAG, "onBind: ", e);
                     e.printStackTrace();
                 }
             });
+        }
+
+        void onBind(SlaveDevice device) {
+            socket = (XiaomiSocket)device;
         }
     }
 
