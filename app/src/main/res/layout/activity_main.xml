@@ -37,6 +37,23 @@
             android:background="@android:color/darker_gray">
 
         </androidx.recyclerview.widget.RecyclerView>
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="20dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sub-devices : "/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerview_sub_device"
+            android:layout_width="370dp"
+            android:layout_height="wrap_content"
+            android:minHeight="100dp"
+            android:background="@android:color/darker_gray">
+
+        </androidx.recyclerview.widget.RecyclerView>
     </LinearLayout>
 
 
