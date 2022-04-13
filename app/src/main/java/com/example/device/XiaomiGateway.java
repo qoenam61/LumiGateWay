@@ -188,9 +188,13 @@ public class XiaomiGateway {
             //TEST CODE
             if (TEST_FOR_APP_DEV) {
                 Log.d(TAG, "[TEST_FOR_APP_DEV] queryDevices: testXiaomiSocket");
-                SlaveDevice device = testXiaomiSocket();
-                knownDevices.put("123456789", device);
-                mSubDeviceListener.onSubDevice("123456789", device);
+                SlaveDevice device1 = testXiaomiSocket();
+                knownDevices.put("123456789", device1);
+                mSubDeviceListener.onSubDevice("123456789", device1);
+
+                SlaveDevice device2 = testXiaomiMotionSensor();
+                knownDevices.put("9874654321", device2);
+                mSubDeviceListener.onSubDevice("987654321", device2);
             }
         } catch (IOException e) {
             throw new XaapiException("Unable to query devices: " + e.getMessage());
@@ -268,6 +272,10 @@ public class XiaomiGateway {
 
     public SlaveDevice testXiaomiSocket() {
         return new XiaomiSocket(this, sid);
+    }
+
+    public SlaveDevice testXiaomiMotionSensor() {
+        return new XiaomiMotionSensor(this, sid);
     }
 
     private SlaveDevice readDevice(String sid) throws XaapiException {
