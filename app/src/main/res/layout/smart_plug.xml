@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:textStyle="bold"
+        android:layout_margin="5dp"
         android:text="Smart Plug"/>
     <LinearLayout
         android:layout_width="wrap_content"

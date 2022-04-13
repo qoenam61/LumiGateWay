@@ -1,5 +1,7 @@
 package com.example.device;
 
+import android.util.Log;
+
 import com.example.XaapiException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevice {
+    private final static String TAG = "XiaomiMotionSensor";
 
     public enum Action {
         Motion
@@ -24,6 +27,7 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
 
     @Override
     void update(String data) {
+        Log.d(TAG, "update - data: " + data);
         try {
             JsonObject o = JSON_PARSER.parse(data).getAsJsonObject();
             if (o.has("status")) {

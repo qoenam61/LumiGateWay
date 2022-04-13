@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private SlaveDeviceAdapter mSlaveDeviceAdapter;
     private XiaomiGateway mGateway;
     private Executor mExecutor;
-    private static final String PASSWORD = "56lb2xqmd3bd2ies";
+    private static final String PASSWORD = "1ccocfmmli41trb5";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
