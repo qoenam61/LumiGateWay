@@ -7,10 +7,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.example.XaapiException;
-import com.example.device.SlaveDevice;
 import com.example.device.XiaomiGateway;
 
 import java.io.IOException;
@@ -25,14 +23,11 @@ public class MainActivity extends AppCompatActivity {
     private DeviceListAdapter mDeviceListAdapter;
     private SlaveDeviceAdapter mSlaveDeviceAdapter;
     private XiaomiGateway mGateway;
-    private Executor mExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        EditText passwordView = findViewById(R.id.password);
 
         RecyclerView deviceListRecyclerView = findViewById(R.id.recyclerview_read_device);
         RecyclerView.LayoutManager deviceListLM = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
@@ -48,27 +43,17 @@ public class MainActivity extends AppCompatActivity {
 
         Button button = findViewById(R.id.send_button);
         button.setOnClickListener(view -> {
-            String password = passwordView.getText().toString();
-            Log.d(TAG, "onCreate - password: " + password);
-            XiaomiGateway gateway = startGateway(password);
-            if (gateway != null && password != null && !password.isEmpty()) {
-                try {
-                    Log.d(TAG, "onCreate: configurePassword");
-                    mGateway.configurePassword(password);
-                } catch (XaapiException e) {
-                    e.printStackTrace();
-                }
-            }
+            startGateway();
         });
 
     }
 
-    private XiaomiGateway startGateway(String password) {
+    private XiaomiGateway startGateway() {
         XiaomiGateway gateway = mGateway;
         if (gateway == null) {
             new Thread(() -> {
                 try {
-                    XiaomiGateway.onFoundSubDevice listener = (sid, deviceInfo) -> {
+                    mGateway = XiaomiGateway.discover((sid, deviceInfo) -> {
                         Log.d(TAG, "onSubDevice - sid: " + sid);
                         mDeviceListAdapter.addDeviceList(deviceInfo);
                         mSlaveDeviceAdapter.addDeviceList(deviceInfo);
@@ -76,19 +61,15 @@ public class MainActivity extends AppCompatActivity {
                             mDeviceListAdapter.notifyDataSetChanged();
                             mSlaveDeviceAdapter.notifyDataSetChanged();
                         });
-                    };
-                    mGateway = XiaomiGateway.discover(listener);
-                    if (password != null && !password.isEmpty()) {
-                        mGateway.configurePassword(password);
-                    }
+                    });
                 } catch (IOException | XaapiException e) {
                     e.printStackTrace();
                 }
 
                 if(mGateway != null && mGateway.getSid() != null) {
                     Log.d(TAG, "onSubDevice - start startReceivingUpdates");
-                    mExecutor = new ThreadPoolExecutor(1, 4, REPORT_PERIOD, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
-                    mGateway.startReceivingUpdates(mExecutor);
+                    Executor executor = new ThreadPoolExecutor(1, 4, REPORT_PERIOD, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+                    mGateway.startReceivingUpdates(executor);
                 }
             }).start();
         }

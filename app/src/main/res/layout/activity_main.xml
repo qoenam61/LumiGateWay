@@ -14,19 +14,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Password :"/>
-        <EditText
-            android:id="@+id/password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
-
         <Button
             android:id="@+id/send_button"
             android:layout_width="wrap_content"
@@ -35,7 +22,7 @@
             android:text="Search Devices"/>
 
         <View
-            android:layout_width="match_parent"
+            android:layout_width="10dp"
             android:layout_height="20dp"/>
 
         <TextView
@@ -52,7 +39,7 @@
         </androidx.recyclerview.widget.RecyclerView>
 
         <View
-            android:layout_width="match_parent"
+            android:layout_width="10dp"
             android:layout_height="20dp"/>
 
         <TextView
