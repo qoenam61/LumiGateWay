@@ -59,8 +59,10 @@ public class XiaomiGateway {
     private Map<String, SlaveDevice> knownDevices = new HashMap<>();
     private boolean continueReceivingUpdates;
     private WhoisReply mWhoisReply;
+    private String mPassword;
 
     private boolean TEST_FOR_APP_DEV = true;
+    private boolean mCipherComplete = false;
 
     public interface onFoundSubDevice {
         void onSubDevice(String sid, SlaveDevice deviceInfo);
@@ -102,6 +104,23 @@ public class XiaomiGateway {
         return new XiaomiGateway(reply, listener);
     }
 
+    public static XiaomiGateway discover(onFoundSubDevice listener, String password) throws IOException, XaapiException {
+        // TODO discover more than one gateway
+        DirectChannel discoveryChannel = new DirectChannel(GROUP, PORT_DISCOVERY);
+        WhoisCommand cmd = new WhoisCommand();
+        Log.d(TAG, "discover - sending ... " + cmd.getString());
+        discoveryChannel.send(cmd.toBytes());
+        Log.d(TAG, "discover - replying ... ");
+        String replyString = new String(discoveryChannel.receive());
+        WhoisReply reply = GSON.fromJson(replyString, WhoisReply.class);
+        Log.d(TAG, "discover - reply model: " + reply.model + " ip: " + reply.ip + " port: " + reply.port);
+        if(Integer.parseInt(reply.port) != PORT) {
+            throw new XaapiException("Gateway occupies unexpected port: " + reply.port);
+        }
+
+        return new XiaomiGateway(reply, listener, password);
+    }
+
     public XiaomiGateway(WhoisReply reply) throws IOException, XaapiException{
         this.mWhoisReply = reply;
         this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
@@ -113,6 +132,7 @@ public class XiaomiGateway {
     }
 
     public XiaomiGateway(WhoisReply reply, onFoundSubDevice listener) throws IOException, XaapiException{
+        mCipherComplete = false;
         mSubDeviceListener = listener;
         this.mWhoisReply = reply;
         this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
@@ -121,6 +141,20 @@ public class XiaomiGateway {
         queryDevices();
         Log.d(TAG, "XiaomiGateway: configureBuiltinDevices");
         configureBuiltinDevices();
+    }
+
+    public XiaomiGateway(WhoisReply reply, onFoundSubDevice listener, String password) throws IOException, XaapiException{
+        mCipherComplete = false;
+        mSubDeviceListener = listener;
+        this.mWhoisReply = reply;
+        this.incomingMulticastChannel = new IncomingMulticastChannel(GROUP, PORT);
+        this.directChannel = new DirectChannel(reply.ip, PORT);
+        Log.d(TAG, "XiaomiGateway: queryDevices");
+        queryDevices();
+        Log.d(TAG, "XiaomiGateway: configureBuiltinDevices");
+        configureBuiltinDevices();
+        configureCipher(password);
+        mPassword = password;
     }
 
     public XiaomiGateway(String ip) throws IOException, XaapiException {
@@ -135,7 +169,15 @@ public class XiaomiGateway {
     }
 
     public void configurePassword(String password) throws XaapiException {
-        configureCipher(password);
+        if (!password.equals(mPassword)) {
+            configureCipher(password);
+        } else {
+            Log.d(TAG, "configurePassword: same password");
+        }
+    }
+
+    public String getPassword() {
+        return mPassword;
     }
 
     public Map<String, SlaveDevice> getKnownDevices() {
@@ -153,10 +195,14 @@ public class XiaomiGateway {
 
     private void configureCipher(String password) throws XaapiException {
         try {
+            mCipherComplete = false;
+            Log.d(TAG, "configureCipher - start: " + password);
             cipher = Cipher.getInstance("AES/CBC/NoPadding");
             final SecretKeySpec keySpec = new SecretKeySpec(password.getBytes(), "AES");
             final IvParameterSpec ivSpec = new IvParameterSpec(IV);
             cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+            Log.d(TAG, "configureCipher - end: " + password);
+            mCipherComplete = true;
         } catch (NoSuchAlgorithmException e) {
             throw new XaapiException("Cipher error: " + e.getMessage());
         } catch (NoSuchPaddingException e) {
@@ -226,6 +272,7 @@ public class XiaomiGateway {
     private void updateKey(String token) throws XaapiException {
         if(cipher != null) {
             try {
+                Log.d(TAG, "updateKey - token: " + token);
                 String keyAsHexString = Utility.toHexString(cipher.doFinal(token.getBytes(StandardCharsets.US_ASCII)));
                 key = Optional.of(keyAsHexString);
             } catch (IllegalBlockSizeException e) {
@@ -239,6 +286,7 @@ public class XiaomiGateway {
     }
 
     void sendDataToDevice(SlaveDevice device, JsonObject data) throws XaapiException {
+        Log.d(TAG, "sendDataToDevice - key : " + key.isPresent());
         if(key.isPresent()) {
             try {
                 WriteCommand command = new WriteCommand(device, data, key.get());
@@ -258,6 +306,7 @@ public class XiaomiGateway {
 
     void sendDataToDevice(BuiltinDevice device /* just a type marker for overloading */, JsonObject data) throws XaapiException {
         assert device.gateway.equals(this);
+        Log.d(TAG, "sendDataToDevice - key : " + key.isPresent());
         if(key.isPresent()) {
             try {
                 directChannel.send(new WriteSelfCommand(this, data, key.get()).toBytes());
@@ -353,6 +402,7 @@ public class XiaomiGateway {
     }
 
     private void handleUpdate(Reply update, String received) throws XaapiException {
+        Log.d(TAG, "handleUpdate - cmd: " + update.cmd + " sid: " + update.sid + " isMyself: " + isMyself(update.sid));
         switch(update.cmd) {
             case "report":
                 Report report = GSON.fromJson(received, Report.class);
@@ -386,7 +436,8 @@ public class XiaomiGateway {
     }
 
     private void handleGatewayHeartbeat(GatewayHeartbeat gatewayHeartbeat) throws XaapiException {
-        if(cipher != null) {
+        if(cipher != null && mCipherComplete) {
+            Log.d(TAG, "handleGatewayHeartbeat - token: " + gatewayHeartbeat.token);
             updateKey(gatewayHeartbeat.token);
         }
     }
