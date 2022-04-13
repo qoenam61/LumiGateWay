@@ -91,23 +91,27 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             buttonOn = itemView.findViewById(R.id.device_smart_plug_on);
             buttonOff = itemView.findViewById(R.id.device_smart_plug_off);
             buttonOn.setOnClickListener(v -> {
-                try {
-                    Log.d(TAG, "onClick: turnOn");
-                    socket.turnOn();
-                } catch (XaapiException e) {
-                    Log.e(TAG, "onBind: ", e);
-                    e.printStackTrace();
-                }
+                new Thread(() -> {
+                    try {
+                        Log.d(TAG, "onClick: turnOn");
+                        socket.turnOn();
+                    } catch (XaapiException e) {
+                        Log.e(TAG, "onBind: ", e);
+                        e.printStackTrace();
+                    }
+                }).start();
             });
 
             buttonOff.setOnClickListener(v -> {
-                try {
-                    Log.d(TAG, "onClick: turnOff");
-                    socket.turnOff();
-                } catch (XaapiException e) {
-                    Log.e(TAG, "onBind: ", e);
-                    e.printStackTrace();
-                }
+                new Thread(() -> {
+                    try {
+                        Log.d(TAG, "onClick: turnOff");
+                        socket.turnOff();
+                    } catch (XaapiException e) {
+                        Log.e(TAG, "onBind: ", e);
+                        e.printStackTrace();
+                    }
+                }).start();
             });
         }
 
