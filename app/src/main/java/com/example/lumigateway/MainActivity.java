@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private SlaveDeviceAdapter mSlaveDeviceAdapter;
     private XiaomiGateway mGateway;
     private Executor mExecutor;
+    private static final String PASSWORD = "56lb2xqmd3bd2ies";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         EditText passwordView = findViewById(R.id.password);
+        passwordView.setText(PASSWORD);
 
         RecyclerView deviceListRecyclerView = findViewById(R.id.recyclerview_read_device);
         RecyclerView.LayoutManager deviceListLM = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
