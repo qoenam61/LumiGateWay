@@ -89,12 +89,14 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     class SmartPlugViewHolder extends RecyclerView.ViewHolder {
+        TextView deviceSid;
         Button buttonOn;
         Button buttonOff;
         XiaomiSocket socket;
 
         public SmartPlugViewHolder(View itemView) {
             super(itemView);
+            deviceSid = itemView.findViewById(R.id.device_sid);
             buttonOn = itemView.findViewById(R.id.device_smart_plug_on);
             buttonOff = itemView.findViewById(R.id.device_smart_plug_off);
             buttonOn.setOnClickListener(v -> {
@@ -124,21 +126,25 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         void onBind(SlaveDevice device) {
             socket = (XiaomiSocket)device;
+            deviceSid.setText(device.getSid());
         }
     }
 
     class SmartMotionSensorViewHolder extends RecyclerView.ViewHolder {
+        TextView deviceSid;
         TextView reportText;
         XiaomiMotionSensor sensor;
         View motionSign;
         public SmartMotionSensorViewHolder(View itemView) {
             super(itemView);
+            deviceSid = itemView.findViewById(R.id.device_sid);
             reportText = itemView.findViewById(R.id.device_motion_sensor);
             motionSign = itemView.findViewById(R.id.motion_sign);
         }
 
         void onBind(SlaveDevice device) {
             sensor = (XiaomiMotionSensor)device;
+            deviceSid.setText(device.getSid());
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
                 @Override
                 public void run() {
@@ -158,17 +164,20 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     class SmartDoorSensorViewHolder extends RecyclerView.ViewHolder {
+        TextView deviceSid;
         TextView reportText;
         XiaomiDoorWindowSensor sensor;
         View motionSign;
         public SmartDoorSensorViewHolder(View itemView) {
             super(itemView);
+            deviceSid = itemView.findViewById(R.id.device_sid);
             reportText = itemView.findViewById(R.id.device_door_sensor);
             motionSign = itemView.findViewById(R.id.door_sign);
         }
 
         void onBind(SlaveDevice device) {
             sensor = (XiaomiDoorWindowSensor)device;
+            deviceSid.setText(device.getSid());
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
                 @Override
                 public void run() {
