@@ -241,10 +241,20 @@ public class XiaomiGateway {
                 SlaveDevice device2 = testXiaomiMotionSensor();
                 knownDevices.put("9874654321", device2);
                 mSubDeviceListener.onSubDevice("987654321", device2);
-                Thread.sleep(3000);
+
+                SlaveDevice device3 = testXiaomiDoorSensor();
+                knownDevices.put("123789456", device3);
+                mSubDeviceListener.onSubDevice("123789456", device3);
+
+                Thread.sleep(2000);
                 getDevice("9874654321").update("{\"status\":\"motion\"}");
-                Thread.sleep(3000);
+                Thread.sleep(2000);
                 getDevice("9874654321").update("{\"status\":\"off\"}");
+
+                Thread.sleep(2000);
+                getDevice("123789456").update("{\"status\":\"close\"}");
+                Thread.sleep(2000);
+                getDevice("123789456").update("{\"status\":\"open\"}");
             }
         } catch (IOException e) {
             throw new XaapiException("Unable to query devices: " + e.getMessage());
@@ -331,6 +341,10 @@ public class XiaomiGateway {
 
     public SlaveDevice testXiaomiMotionSensor() {
         return new XiaomiMotionSensor(this, sid);
+    }
+
+    public SlaveDevice testXiaomiDoorSensor() {
+        return new XiaomiDoorWindowSensor(this, sid);
     }
 
     private SlaveDevice readDevice(String sid) throws XaapiException {

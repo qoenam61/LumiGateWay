@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.XaapiException;
 import com.example.device.IInteractiveDevice;
 import com.example.device.SlaveDevice;
+import com.example.device.XiaomiDoorWindowSensor;
 import com.example.device.XiaomiMotionSensor;
 import com.example.device.XiaomiSocket;
 
@@ -38,11 +39,14 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         View view;
         if (viewType == SlaveDevice.Type.Sensor_Motion_AQ2.ordinal()
                 || viewType == SlaveDevice.Type.XiaomiMotionSensor.ordinal()) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.motion_sendor, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.smart_motion_sendor, parent, false);
             return new SmartMotionSensorViewHolder(view);
         } else if (viewType == SlaveDevice.Type.XiaomiSocket.ordinal()) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.smart_plug, parent, false);
             return new SmartPlugViewHolder(view);
+        } else if (viewType == SlaveDevice.Type.XiaomiDoorWindowSensor.ordinal()) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.smart_door_sensor, parent, false);
+            return new SmartDoorSensorViewHolder(view);
         } else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_list_item, parent, false);
             return new DefaultViewHolder(view);
@@ -57,6 +61,8 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ((SmartPlugViewHolder)holder).onBind(device);
         } else if (holder instanceof SmartMotionSensorViewHolder) {
             ((SmartMotionSensorViewHolder)holder).onBind(device);
+        } else if (holder instanceof SmartDoorSensorViewHolder) {
+            ((SmartDoorSensorViewHolder)holder).onBind(device);
         } else {
             ((DefaultViewHolder)holder).onBind(device);
         }
@@ -146,6 +152,36 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                                 motionSign.setBackgroundColor(Color.RED);
                             }
                         });
+                }
+            });
+        }
+    }
+
+    class SmartDoorSensorViewHolder extends RecyclerView.ViewHolder {
+        TextView reportText;
+        XiaomiDoorWindowSensor sensor;
+        View motionSign;
+        public SmartDoorSensorViewHolder(View itemView) {
+            super(itemView);
+            reportText = itemView.findViewById(R.id.device_door_sensor);
+            motionSign = itemView.findViewById(R.id.door_sign);
+        }
+
+        void onBind(SlaveDevice device) {
+            sensor = (XiaomiDoorWindowSensor)device;
+            IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "run: subscribeForMotion");
+                    mActivity.runOnUiThread(() -> {
+                        if (sensor.getLastAction() == XiaomiDoorWindowSensor.Action.Close) {
+                            reportText.setText("Close");
+                            motionSign.setBackgroundColor(Color.BLUE);
+                        } else {
+                            reportText.setText("Open");
+                            motionSign.setBackgroundColor(Color.RED);
+                        }
+                    });
                 }
             });
         }
