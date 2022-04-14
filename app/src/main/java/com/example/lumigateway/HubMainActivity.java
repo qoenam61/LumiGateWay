@@ -19,7 +19,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class HubMainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final long REPORT_PERIOD = 1000;
     private DeviceListAdapter mDeviceListAdapter;

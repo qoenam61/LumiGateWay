@@ -241,15 +241,21 @@ public class XiaomiGateway {
                 SlaveDevice device2 = testXiaomiMotionSensor();
                 knownDevices.put("9874654321", device2);
                 mSubDeviceListener.onSubDevice("987654321", device2);
+                Thread.sleep(3000);
+                getDevice("9874654321").update("{\"status\":\"motion\"}");
+                Thread.sleep(3000);
+                getDevice("9874654321").update("{\"status\":\"off\"}");
             }
         } catch (IOException e) {
             throw new XaapiException("Unable to query devices: " + e.getMessage());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
     public SlaveDevice getDevice(String sid) {
         SlaveDevice device = knownDevices.get(sid);
-        assert(device.getSid().equals(sid));
+//        assert(getSid().equals(sid));
         return device;
     }
 

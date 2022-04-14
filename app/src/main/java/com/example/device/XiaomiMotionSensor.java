@@ -2,19 +2,20 @@ package com.example.device;
 
 import android.util.Log;
 
-import com.example.XaapiException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevice {
     private final static String TAG = "XiaomiMotionSensor";
 
     public enum Action {
-        Motion
+        Unknown, Motion
     }
 
     private Action lastAction;
@@ -27,23 +28,24 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
 
     @Override
     void update(String data) {
-        Log.d(TAG, "update - data: " + data);
         try {
             JsonObject o = JSON_PARSER.parse(data).getAsJsonObject();
             if (o.has("status")) {
                 String action = o.get("status").getAsString();
+                Log.d(TAG, "update - data: " + data + " action: " + action);
                 switch(action) {
                     case "motion":
                         lastAction = Action.Motion;
                         notifyWithMotion();
                         break;
                     default:
-                        throw new XaapiException("Unknown action: " + action);
+                        Log.d(TAG, "update - Unknown action: " + action);
+                        lastAction = Action.Unknown;
+                        notifyWithMotion();
+//                        throw new XaapiException("Unknown action: " + action);
                 }
                 notifyWithAction(action);
             }
-        } catch (XaapiException e) {
-            e.printStackTrace();
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
         }
@@ -69,8 +71,10 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
     }
 
     private void notifyWithMotion() {
-        for(Runnable r : motionCallbacks.values()) {
-            r.run();
+        Iterator<SubscriptionToken> iterator = motionCallbacks.keySet().iterator();
+        while (iterator.hasNext()) {
+            SubscriptionToken token = iterator.next();
+            Objects.requireNonNull(motionCallbacks.get(token)).run();
         }
     }
 }

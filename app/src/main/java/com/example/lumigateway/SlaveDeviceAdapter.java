@@ -1,6 +1,7 @@
 package com.example.lumigateway;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -123,9 +124,11 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     class SmartMotionSensorViewHolder extends RecyclerView.ViewHolder {
         TextView reportText;
         XiaomiMotionSensor sensor;
+        View motionSign;
         public SmartMotionSensorViewHolder(View itemView) {
             super(itemView);
             reportText = itemView.findViewById(R.id.device_motion_sensor);
+            motionSign = itemView.findViewById(R.id.motion_sign);
         }
 
         void onBind(SlaveDevice device) {
@@ -133,12 +136,18 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
                 @Override
                 public void run() {
-                    mActivity.runOnUiThread(() -> {
-                        reportText.setText("Motion");
-                    });
+                    Log.d(TAG, "run: subscribeForMotion");
+                        mActivity.runOnUiThread(() -> {
+                            if (sensor.getLastAction() == XiaomiMotionSensor.Action.Motion) {
+                                reportText.setText("Motion");
+                                motionSign.setBackgroundColor(Color.BLUE);
+                            } else {
+                                reportText.setText("Unknown");
+                                motionSign.setBackgroundColor(Color.RED);
+                            }
+                        });
                 }
             });
-            sensor.unsubscribeForMotion(token);
         }
     }
 }
