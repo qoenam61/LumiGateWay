@@ -90,6 +90,9 @@ public class HubMainActivity extends AppCompatActivity {
                 try {
                     XiaomiGateway.onFoundSubDevice listener = (sid, deviceInfo) -> {
                         Log.d(TAG, "onSubDevice - sid: " + sid);
+                        if (mDeviceListAdapter == null || mSlaveDeviceAdapter == null) {
+                            return;
+                        }
                         mDeviceListAdapter.addDeviceList(deviceInfo);
                         mSlaveDeviceAdapter.addDeviceList(deviceInfo);
                         runOnUiThread(() -> {
