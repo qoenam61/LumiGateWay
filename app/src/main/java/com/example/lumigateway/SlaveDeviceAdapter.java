@@ -47,7 +47,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void onSmartPlug(SlaveDevice device, String s);
         void onSmartMotionSensor(SlaveDevice device, String s);
         void onSmartDoorSensor(SlaveDevice device, String s);
-        void onSmartPlugProfile(SlaveDevice device, short shortId, boolean enable);
+        void onAddProfile(SlaveDevice device, short shortId, boolean enable);
     }
 
     private OnSlaveDeviceEvent mListener;
@@ -144,7 +144,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (mListener != null && socket != null) {
-                        mListener.onSmartPlugProfile(socket, socket.getShortId(), isChecked);
+                        mListener.onAddProfile(socket, socket.getShortId(), isChecked);
                     }
                 }
             });
@@ -207,7 +207,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForActions(new Consumer<String>() {
                 @Override
                 public void accept(String s) {
-                    Log.d(TAG, "run: subscribeForMotion");
+                    Log.d(TAG, "SmartMotionSensorViewHolder - " + sensor.getShortId() + " action: " + s);
                     mListener.onSmartMotionSensor(sensor, s);
                     mActivity.runOnUiThread(() -> {
                         if (s.equals("motion")) {
@@ -242,7 +242,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForActions(new Consumer<String>() {
                 @Override
                 public void accept(String s) {
-                    Log.d(TAG, "run: subscribeForMotion");
+                    Log.d(TAG, "SmartDoorSensorViewHolder - " + sensor.getShortId() + " action: " + s);
                     mListener.onSmartDoorSensor(sensor, s);
                     mActivity.runOnUiThread(() -> {
                         if (s.equals("close")) {

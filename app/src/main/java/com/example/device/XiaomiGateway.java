@@ -180,34 +180,34 @@ public class XiaomiGateway {
         //TEST CODE
         if (TEST_FOR_APP_DEV) {
             Log.d(TAG, "[TEST_FOR_APP_DEV] queryDevices: testXiaomiSocket");
-            SlaveDevice device1 = testXiaomiSocket("123456789");
+            SlaveDevice device1 = testXiaomiSocket("123456789", (short) 1111);
             knownDevices.put("123456789", device1);
             mSubDeviceListener.onSubDevice("123456789", device1);
 
-            SlaveDevice device2 = testXiaomiMotionSensor("9874654321");
+            SlaveDevice device2 = testXiaomiMotionSensor("9874654321", (short) 2222);
             knownDevices.put("9874654321", device2);
             mSubDeviceListener.onSubDevice("987654321", device2);
 
-            SlaveDevice device3 = testXiaomiDoorSensor("123789456");
+            SlaveDevice device3 = testXiaomiDoorSensor("123789456", (short) 3333);
             knownDevices.put("123789456", device3);
             mSubDeviceListener.onSubDevice("123789456", device3);
 
-            SlaveDevice device4 = testXiaomiSocket("456789123");
+            SlaveDevice device4 = testXiaomiSocket("456789123", (short) 4444);
             knownDevices.put("456789123", device4);
             mSubDeviceListener.onSubDevice("456789123", device4);
 
-            SlaveDevice device5 = testXiaomiMotionSensor("963852741");
+            SlaveDevice device5 = testXiaomiMotionSensor("963852741", (short) 5555);
             knownDevices.put("963852741", device5);
             mSubDeviceListener.onSubDevice("963852741", device5);
 
-            Thread.sleep(2000);
+            Thread.sleep(5000);
             getDevice("9874654321").update("{\"status\":\"motion\"}");
-            Thread.sleep(2000);
+            Thread.sleep(5000);
             getDevice("9874654321").update("{\"status\":\"off\"}");
 
-            Thread.sleep(2000);
+            Thread.sleep(5000);
             getDevice("123789456").update("{\"status\":\"close\"}");
-            Thread.sleep(2000);
+            Thread.sleep(5000);
             getDevice("123789456").update("{\"status\":\"open\"}");
         }
     }
@@ -347,16 +347,16 @@ public class XiaomiGateway {
         }
     }
 
-    public SlaveDevice testXiaomiSocket(String sid) {
-        return new XiaomiSocket(this, sid);
+    public SlaveDevice testXiaomiSocket(String sid, short shortId) {
+        return new XiaomiSocket(this, sid, shortId);
     }
 
-    public SlaveDevice testXiaomiMotionSensor(String sid) {
-        return new XiaomiMotionSensor(this, sid);
+    public SlaveDevice testXiaomiMotionSensor(String sid, short shortId) {
+        return new XiaomiMotionSensor(this, sid, shortId);
     }
 
-    public SlaveDevice testXiaomiDoorSensor(String sid) {
-        return new XiaomiDoorWindowSensor(this, sid);
+    public SlaveDevice testXiaomiDoorSensor(String sid, short shortId) {
+        return new XiaomiDoorWindowSensor(this, sid, shortId);
     }
 
     private SlaveDevice readDevice(String sid) throws XaapiException {

@@ -60,6 +60,7 @@ public class XiaomiSocket extends SlaveDevice implements IInteractiveDevice {
 
     @Override
     public void executeProfile() {
+        Log.d(TAG, "executeProfile: ");
         new Thread(() -> {
             try {
                 turnOn();

@@ -133,7 +133,8 @@ public class HubMainActivity extends AppCompatActivity {
 
         @Override
         public void onSmartMotionSensor(SlaveDevice device, String s) {
-            if (XiaomiMotionSensor.Action.Motion.equals(s)) {
+            Log.d(TAG, "onSmartMotionSensor: " + s + " name: " + XiaomiMotionSensor.Action.Motion.name());
+            if (mEnableAutoProfile && XiaomiMotionSensor.Action.Motion.name().equalsIgnoreCase(s)) {
                 executeAllProfile();
             }
         }
@@ -144,7 +145,8 @@ public class HubMainActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onSmartPlugProfile(SlaveDevice device, short shortId, boolean enable) {
+        public void onAddProfile(SlaveDevice device, short shortId, boolean enable) {
+            Log.d(TAG, "onAddProfile - shortId: " + shortId + " enable: " + enable);
             if (enable) {
                 myProfile.put(shortId, device);
             } else {
@@ -156,6 +158,7 @@ public class HubMainActivity extends AppCompatActivity {
             Iterator<SlaveDevice> iterator = myProfile.values().iterator();
             while (iterator.hasNext()) {
                 SlaveDevice device = iterator.next();
+                Log.d(TAG, "executeAllProfile: " + device.getShortId());
                 device.executeProfile();
             }
         }
