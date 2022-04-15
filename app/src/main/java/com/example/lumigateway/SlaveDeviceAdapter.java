@@ -19,6 +19,7 @@ import com.example.device.XiaomiMotionSensor;
 import com.example.device.XiaomiSocket;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static String TAG = "SlaveDeviceAdapter";
@@ -127,6 +128,12 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void onBind(SlaveDevice device) {
             socket = (XiaomiSocket)device;
             deviceSid.setText(device.getSid());
+            socket.subscribeForActions(new Consumer<String>() {
+                @Override
+                public void accept(String s) {
+                    Log.d(TAG, "accept: " + s);
+                }
+            });
         }
     }
 
@@ -142,7 +149,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             motionSign = itemView.findViewById(R.id.motion_sign);
         }
 
-        void onBind(SlaveDevice device) {
+/*        void onBind(SlaveDevice device) {
             sensor = (XiaomiMotionSensor)device;
             deviceSid.setText(device.getSid());
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
@@ -160,6 +167,26 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                         });
                 }
             });
+        }*/
+
+        void onBind(SlaveDevice device) {
+            sensor = (XiaomiMotionSensor)device;
+            deviceSid.setText(device.getSid());
+            IInteractiveDevice.SubscriptionToken token = sensor.subscribeForActions(new Consumer<String>() {
+                @Override
+                public void accept(String s) {
+                    Log.d(TAG, "run: subscribeForMotion");
+                    mActivity.runOnUiThread(() -> {
+                        if (s.equals("motion")) {
+                            reportText.setText("Motion");
+                            motionSign.setBackgroundColor(Color.BLUE);
+                        } else {
+                            reportText.setText("Unknown");
+                            motionSign.setBackgroundColor(Color.RED);
+                        }
+                    });
+                }
+            });
         }
     }
 
@@ -168,6 +195,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         TextView reportText;
         XiaomiDoorWindowSensor sensor;
         View motionSign;
+
         public SmartDoorSensorViewHolder(View itemView) {
             super(itemView);
             deviceSid = itemView.findViewById(R.id.device_sid);
@@ -176,6 +204,26 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
 
         void onBind(SlaveDevice device) {
+            sensor = (XiaomiDoorWindowSensor) device;
+            deviceSid.setText(device.getSid());
+            IInteractiveDevice.SubscriptionToken token = sensor.subscribeForActions(new Consumer<String>() {
+                @Override
+                public void accept(String s) {
+                    Log.d(TAG, "run: subscribeForMotion");
+                    mActivity.runOnUiThread(() -> {
+                        if (s.equals("close")) {
+                            reportText.setText("Close");
+                            motionSign.setBackgroundColor(Color.BLUE);
+                        } else {
+                            reportText.setText("Open");
+                            motionSign.setBackgroundColor(Color.RED);
+                        }
+                    });
+                }
+            });
+        }
+
+/*        void onBind(SlaveDevice device) {
             sensor = (XiaomiDoorWindowSensor)device;
             deviceSid.setText(device.getSid());
             IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
@@ -193,6 +241,6 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     });
                 }
             });
-        }
+        }*/
     }
 }
