@@ -56,6 +56,11 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
     }
 
     @Override
+    public void executeProfile() {
+
+    }
+
+    @Override
     public Map<SubscriptionToken, Consumer<String>> getActionsCallbacks() {
         return actionsCallbacks;
     }

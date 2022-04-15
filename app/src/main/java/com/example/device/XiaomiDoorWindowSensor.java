@@ -56,6 +56,11 @@ public class XiaomiDoorWindowSensor extends SlaveDevice implements IInteractiveD
     }
 
     @Override
+    public void executeProfile() {
+
+    }
+
+    @Override
     public Map<SubscriptionToken, Consumer<String>> getActionsCallbacks() {
         return actionsCallbacks;
     }

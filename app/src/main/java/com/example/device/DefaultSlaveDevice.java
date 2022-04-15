@@ -27,4 +27,9 @@ public class DefaultSlaveDevice extends SlaveDevice {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void executeProfile() {
+
+    }
 }

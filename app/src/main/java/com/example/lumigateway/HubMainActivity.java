@@ -13,10 +13,14 @@ import android.widget.EditText;
 import com.example.XaapiException;
 import com.example.device.SlaveDevice;
 import com.example.device.XiaomiGateway;
+import com.example.device.XiaomiMotionSensor;
 import com.kyleduo.switchbutton.SwitchButton;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -32,7 +36,7 @@ public class HubMainActivity extends AppCompatActivity {
     private static final String PASSWORD = "1ccocfmmli41trb5";
     private boolean mEnableAutoProfile;
     private MyAutoProfile mMyProfile;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,6 +124,7 @@ public class HubMainActivity extends AppCompatActivity {
     }
 
     class MyAutoProfile implements SlaveDeviceAdapter.OnSlaveDeviceEvent {
+        Map<Short, SlaveDevice> myProfile = new HashMap<>();
 
         @Override
         public void onSmartPlug(SlaveDevice device, String s) {
@@ -128,12 +133,31 @@ public class HubMainActivity extends AppCompatActivity {
 
         @Override
         public void onSmartMotionSensor(SlaveDevice device, String s) {
-
+            if (XiaomiMotionSensor.Action.Motion.equals(s)) {
+                executeAllProfile();
+            }
         }
 
         @Override
         public void onSmartDoorSensor(SlaveDevice device, String s) {
 
+        }
+
+        @Override
+        public void onSmartPlugProfile(SlaveDevice device, short shortId, boolean enable) {
+            if (enable) {
+                myProfile.put(shortId, device);
+            } else {
+                myProfile.remove(shortId);
+            }
+        }
+
+        private void executeAllProfile() {
+            Iterator<SlaveDevice> iterator = myProfile.values().iterator();
+            while (iterator.hasNext()) {
+                SlaveDevice device = iterator.next();
+                device.executeProfile();
+            }
         }
     }
 }

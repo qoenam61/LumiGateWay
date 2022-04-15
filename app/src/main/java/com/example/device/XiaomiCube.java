@@ -53,6 +53,11 @@ public class XiaomiCube extends SlaveDevice implements IInteractiveDevice {
     }
 
     @Override
+    public void executeProfile() {
+
+    }
+
+    @Override
     public Map<SubscriptionToken, Consumer<String>> getActionsCallbacks() {
         return actionsCallbacks;
     }

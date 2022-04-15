@@ -1,5 +1,7 @@
 package com.example.device;
 
+import android.util.Log;
+
 import com.example.XaapiException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -9,6 +11,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class XiaomiSocket extends SlaveDevice implements IInteractiveDevice {
+    private static final String TAG = "XiaomiSocket";
 
     public enum Action {
         On,
@@ -53,6 +56,18 @@ public class XiaomiSocket extends SlaveDevice implements IInteractiveDevice {
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void executeProfile() {
+        new Thread(() -> {
+            try {
+                turnOn();
+            } catch (XaapiException e) {
+                Log.e(TAG, "onBind: ", e);
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override

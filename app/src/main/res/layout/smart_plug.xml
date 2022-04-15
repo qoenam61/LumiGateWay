@@ -24,6 +24,12 @@
             android:textStyle="bold"
             android:layout_margin="5dp"
             android:text="xxx"/>
+        <com.kyleduo.switchbutton.SwitchButton
+            android:id="@+id/button_auto_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="120dp"
+            style="@style/SwitchButtonStyle"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="wrap_content"

@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,6 +18,7 @@ import com.example.device.SlaveDevice;
 import com.example.device.XiaomiDoorWindowSensor;
 import com.example.device.XiaomiMotionSensor;
 import com.example.device.XiaomiSocket;
+import com.kyleduo.switchbutton.SwitchButton;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -45,6 +47,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         void onSmartPlug(SlaveDevice device, String s);
         void onSmartMotionSensor(SlaveDevice device, String s);
         void onSmartDoorSensor(SlaveDevice device, String s);
+        void onSmartPlugProfile(SlaveDevice device, short shortId, boolean enable);
     }
 
     private OnSlaveDeviceEvent mListener;
@@ -108,12 +111,15 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         Button buttonOn;
         Button buttonOff;
         XiaomiSocket socket;
+        SwitchButton autoProfile;
 
         public SmartPlugViewHolder(View itemView) {
             super(itemView);
             deviceSid = itemView.findViewById(R.id.device_sid);
             buttonOn = itemView.findViewById(R.id.device_smart_plug_on);
             buttonOff = itemView.findViewById(R.id.device_smart_plug_off);
+            autoProfile = itemView.findViewById(R.id.button_auto_profile);
+
             buttonOn.setOnClickListener(v -> {
                 smartPlugOnOff(socket, true);
             });
@@ -133,24 +139,35 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     mListener.onSmartPlug(device, s);
                 }
             });
+
+            autoProfile.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (mListener != null && socket != null) {
+                        mListener.onSmartPlugProfile(socket, socket.getShortId(), isChecked);
+                    }
+                }
+            });
+        }
+
+        private void smartPlugOnOff(XiaomiSocket socket, boolean on) {
+            new Thread(() -> {
+                try {
+                    Log.d(TAG, "onClick: turnOn");
+                    if (on) {
+                        socket.turnOn();
+                    } else {
+                        socket.turnOff();
+                    }
+                } catch (XaapiException e) {
+                    Log.e(TAG, "onBind: ", e);
+                    e.printStackTrace();
+                }
+            }).start();
         }
     }
 
-    public void smartPlugOnOff(XiaomiSocket socket, boolean on) {
-        new Thread(() -> {
-            try {
-                Log.d(TAG, "onClick: turnOn");
-                if (on) {
-                    socket.turnOn();
-                } else {
-                    socket.turnOff();
-                }
-            } catch (XaapiException e) {
-                Log.e(TAG, "onBind: ", e);
-                e.printStackTrace();
-            }
-        }).start();
-    }
+
 
     class SmartMotionSensorViewHolder extends RecyclerView.ViewHolder {
         TextView deviceSid;

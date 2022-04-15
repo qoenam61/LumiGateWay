@@ -53,6 +53,8 @@ public abstract class SlaveDevice {
 
     abstract void update(String data);
 
+    public abstract void executeProfile();
+
     public XiaomiCube asXiaomiCube() throws XaapiException {
         ensureType(Type.XiaomiCube);
         return (XiaomiCube) this;
