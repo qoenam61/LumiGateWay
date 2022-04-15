@@ -23,7 +23,8 @@ import java.util.function.Consumer;
 
 public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final static String TAG = "SlaveDeviceAdapter";
-    private ArrayList<SlaveDevice> mDeviceList = new ArrayList<>();
+
+    private final ArrayList<SlaveDevice> mDeviceList = new ArrayList<>();
 
     private Activity mActivity;
 
@@ -31,9 +32,22 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         mActivity = activity;
     }
 
+    public SlaveDeviceAdapter(Activity activity, OnSlaveDeviceEvent listener) {
+        mActivity = activity;
+        mListener = listener;
+    }
+
     public void addDeviceList(SlaveDevice deviceInfo) {
         this.mDeviceList.add(deviceInfo);
     }
+
+    public interface OnSlaveDeviceEvent {
+        void onSmartPlug(SlaveDevice device, String s);
+        void onSmartMotionSensor(SlaveDevice device, String s);
+        void onSmartDoorSensor(SlaveDevice device, String s);
+    }
+
+    private OnSlaveDeviceEvent mListener;
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -101,27 +115,11 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             buttonOn = itemView.findViewById(R.id.device_smart_plug_on);
             buttonOff = itemView.findViewById(R.id.device_smart_plug_off);
             buttonOn.setOnClickListener(v -> {
-                new Thread(() -> {
-                    try {
-                        Log.d(TAG, "onClick: turnOn");
-                        socket.turnOn();
-                    } catch (XaapiException e) {
-                        Log.e(TAG, "onBind: ", e);
-                        e.printStackTrace();
-                    }
-                }).start();
+                smartPlugOnOff(socket, true);
             });
 
             buttonOff.setOnClickListener(v -> {
-                new Thread(() -> {
-                    try {
-                        Log.d(TAG, "onClick: turnOff");
-                        socket.turnOff();
-                    } catch (XaapiException e) {
-                        Log.e(TAG, "onBind: ", e);
-                        e.printStackTrace();
-                    }
-                }).start();
+                smartPlugOnOff(socket, false);
             });
         }
 
@@ -132,9 +130,26 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void accept(String s) {
                     Log.d(TAG, "accept: " + s);
+                    mListener.onSmartPlug(device, s);
                 }
             });
         }
+    }
+
+    public void smartPlugOnOff(XiaomiSocket socket, boolean on) {
+        new Thread(() -> {
+            try {
+                Log.d(TAG, "onClick: turnOn");
+                if (on) {
+                    socket.turnOn();
+                } else {
+                    socket.turnOff();
+                }
+            } catch (XaapiException e) {
+                Log.e(TAG, "onBind: ", e);
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     class SmartMotionSensorViewHolder extends RecyclerView.ViewHolder {
@@ -176,6 +191,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void accept(String s) {
                     Log.d(TAG, "run: subscribeForMotion");
+                    mListener.onSmartMotionSensor(sensor, s);
                     mActivity.runOnUiThread(() -> {
                         if (s.equals("motion")) {
                             reportText.setText("Motion");
@@ -210,6 +226,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 @Override
                 public void accept(String s) {
                     Log.d(TAG, "run: subscribeForMotion");
+                    mListener.onSmartDoorSensor(sensor, s);
                     mActivity.runOnUiThread(() -> {
                         if (s.equals("close")) {
                             reportText.setText("Close");
@@ -242,5 +259,9 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
         }*/
+    }
+
+    public ArrayList<SlaveDevice> getDeviceList() {
+        return mDeviceList;
     }
 }

@@ -26,6 +26,10 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
         super(gateway, sid, Type.XiaomiMotionSensor);
     }
 
+    XiaomiMotionSensor(XiaomiGateway gateway, String sid, short shortId) {
+        super(gateway, sid, Type.XiaomiSocket, shortId);
+    }
+
     @Override
     void update(String data) {
         try {

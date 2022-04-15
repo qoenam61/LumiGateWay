@@ -27,6 +27,10 @@ public class XiaomiDoorWindowSensor extends SlaveDevice implements IInteractiveD
         super(gateway, sid, Type.XiaomiDoorWindowSensor);
     }
 
+    XiaomiDoorWindowSensor(XiaomiGateway gateway, String sid, short shortId) {
+        super(gateway, sid, Type.XiaomiDoorWindowSensor, shortId);
+    }
+
     @Override
     void update(String data) {
         try {

@@ -7,13 +7,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 
 import com.example.XaapiException;
 import com.example.device.SlaveDevice;
 import com.example.device.XiaomiGateway;
+import com.kyleduo.switchbutton.SwitchButton;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,7 +30,9 @@ public class HubMainActivity extends AppCompatActivity {
     private XiaomiGateway mGateway;
     private Executor mExecutor;
     private static final String PASSWORD = "1ccocfmmli41trb5";
-
+    private boolean mEnableAutoProfile;
+    private MyAutoProfile mMyProfile;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,7 +50,9 @@ public class HubMainActivity extends AppCompatActivity {
         RecyclerView subDeviceRecyclerView = findViewById(R.id.recyclerview_sub_device);
         RecyclerView.LayoutManager subDeviceLM = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         subDeviceRecyclerView.setLayoutManager(subDeviceLM);
-        mSlaveDeviceAdapter = new SlaveDeviceAdapter(this);
+
+        mMyProfile = new MyAutoProfile();
+        mSlaveDeviceAdapter = new SlaveDeviceAdapter(this, mMyProfile);
         subDeviceRecyclerView.setAdapter(mSlaveDeviceAdapter);
 
         Button button = findViewById(R.id.send_button);
@@ -63,6 +70,13 @@ public class HubMainActivity extends AppCompatActivity {
             }
         });
 
+        SwitchButton switchButton = findViewById(R.id.button_auto_profile);
+        switchButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mEnableAutoProfile = isChecked;
+            }
+        });
     }
 
     private XiaomiGateway startGateway(String password) {
@@ -102,6 +116,24 @@ public class HubMainActivity extends AppCompatActivity {
         super.onDestroy();
         if (mGateway != null) {
             mGateway.stopReceivingUpdates();
+        }
+    }
+
+    class MyAutoProfile implements SlaveDeviceAdapter.OnSlaveDeviceEvent {
+
+        @Override
+        public void onSmartPlug(SlaveDevice device, String s) {
+
+        }
+
+        @Override
+        public void onSmartMotionSensor(SlaveDevice device, String s) {
+
+        }
+
+        @Override
+        public void onSmartDoorSensor(SlaveDevice device, String s) {
+
         }
     }
 }

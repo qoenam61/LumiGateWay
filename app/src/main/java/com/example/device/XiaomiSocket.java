@@ -23,6 +23,10 @@ public class XiaomiSocket extends SlaveDevice implements IInteractiveDevice {
         super(gateway, sid, Type.XiaomiSocket);
     }
 
+    XiaomiSocket(XiaomiGateway gateway, String sid, short shortId) {
+        super(gateway, sid, Type.XiaomiSocket, shortId);
+    }
+
     @Override
     void update(String data) {
         try {

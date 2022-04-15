@@ -22,11 +22,17 @@ public abstract class SlaveDevice {
     protected XiaomiGateway gateway;
     private String sid;
     private Type type;
+    private short mShortId;
 
     public SlaveDevice(XiaomiGateway gateway, String sid, Type type) {
         this.gateway = gateway;
         this.sid = sid;
         this.type = type;
+    }
+
+    public SlaveDevice(XiaomiGateway gateway, String sid, Type type, short shortId) {
+        this(gateway, sid, type);
+        this.mShortId = shortId;
     }
 
     public Type getType() {
@@ -38,8 +44,11 @@ public abstract class SlaveDevice {
     }
 
     public short getShortId() {
-//        throw new NotImplementedException(); // TODO implement
-        return 0;
+        return mShortId;
+    }
+
+    public void setShortId(short shortId) {
+        this.mShortId = shortId;
     }
 
     abstract void update(String data);

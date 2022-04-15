@@ -372,15 +372,15 @@ public class XiaomiGateway {
                     cube.update(reply.data);
                     return cube;
                 case "magnet":
-                    XiaomiDoorWindowSensor magnet = new XiaomiDoorWindowSensor(this, sid);
+                    XiaomiDoorWindowSensor magnet = new XiaomiDoorWindowSensor(this, sid, Short.parseShort(reply.short_id));
                     magnet.update(reply.data);
                     return magnet;
                 case "plug":
-                    XiaomiSocket plug = new XiaomiSocket(this, sid);
+                    XiaomiSocket plug = new XiaomiSocket(this, sid, Short.parseShort(reply.short_id));
                     plug.update(reply.data);
                     return plug;
                 case "motion":
-                    XiaomiMotionSensor motion = new XiaomiMotionSensor(this, sid);
+                    XiaomiMotionSensor motion = new XiaomiMotionSensor(this, sid, Short.parseShort(reply.short_id));
                     motion.update(reply.data);
                     return motion;
                 case "switch":
