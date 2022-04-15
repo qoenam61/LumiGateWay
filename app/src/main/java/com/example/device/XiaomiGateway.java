@@ -200,15 +200,27 @@ public class XiaomiGateway {
             knownDevices.put("963852741", device5);
             mSubDeviceListener.onSubDevice("963852741", device5);
 
-            Thread.sleep(5000);
-            getDevice("9874654321").update("{\"status\":\"motion\"}");
-            Thread.sleep(5000);
-            getDevice("9874654321").update("{\"status\":\"off\"}");
+            new Thread(() -> {
+                try {
+                    Thread.sleep(10000);
 
-            Thread.sleep(5000);
-            getDevice("123789456").update("{\"status\":\"close\"}");
-            Thread.sleep(5000);
-            getDevice("123789456").update("{\"status\":\"open\"}");
+                    Thread.sleep(5000);
+                    getDevice("9874654321").update("{\"status\":\"motion\"}");
+
+                    Thread.sleep(5000);
+                    getDevice("9874654321").update("{\"status\":\"off\"}");
+
+                    Thread.sleep(5000);
+                    getDevice("123789456").update("{\"status\":\"close\"}");
+
+                    Thread.sleep(5000);
+                    getDevice("123789456").update("{\"status\":\"open\"}");
+
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+
         }
     }
 
