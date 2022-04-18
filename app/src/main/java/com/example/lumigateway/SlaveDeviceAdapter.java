@@ -188,26 +188,6 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             motionSign = itemView.findViewById(R.id.motion_sign);
         }
 
-/*        void onBind(SlaveDevice device) {
-            sensor = (XiaomiMotionSensor)device;
-            deviceSid.setText(device.getSid());
-            IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "run: subscribeForMotion");
-                        mActivity.runOnUiThread(() -> {
-                            if (sensor.getLastAction() == XiaomiMotionSensor.Action.Motion) {
-                                reportText.setText("Motion");
-                                motionSign.setBackgroundColor(Color.BLUE);
-                            } else {
-                                reportText.setText("Unknown");
-                                motionSign.setBackgroundColor(Color.RED);
-                            }
-                        });
-                }
-            });
-        }*/
-
         void onBind(SlaveDevice device) {
             sensor = (XiaomiMotionSensor)device;
             deviceSid.setText(device.getSid());
@@ -263,26 +243,6 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
         }
-
-/*        void onBind(SlaveDevice device) {
-            sensor = (XiaomiDoorWindowSensor)device;
-            deviceSid.setText(device.getSid());
-            IInteractiveDevice.SubscriptionToken token = sensor.subscribeForMotion(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "run: subscribeForMotion");
-                    mActivity.runOnUiThread(() -> {
-                        if (sensor.getLastAction() == XiaomiDoorWindowSensor.Action.Close) {
-                            reportText.setText("Close");
-                            motionSign.setBackgroundColor(Color.BLUE);
-                        } else {
-                            reportText.setText("Open");
-                            motionSign.setBackgroundColor(Color.RED);
-                        }
-                    });
-                }
-            });
-        }*/
     }
 
     class TradFriBulbViewHolder extends RecyclerView.ViewHolder {
