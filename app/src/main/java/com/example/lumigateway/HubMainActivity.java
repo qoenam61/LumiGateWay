@@ -17,6 +17,9 @@ import com.example.device.XiaomiMotionSensor;
 import com.kyleduo.switchbutton.SwitchButton;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -164,6 +167,72 @@ public class HubMainActivity extends AppCompatActivity {
                 Log.d(TAG, "executeAllProfile: " + device.getShortId());
                 device.executeProfile();
             }
+        }
+    }
+
+    class TestTVDevice {
+        //To WOL on TV
+        private static final String IP_WOL_DEVICE = "192.168.45.53";
+        private static final String IP_MAGIC_WOL_DEVICE = "192.168.45.255";
+        private static final String MAC_WOL_DEVICE = "64:CB:E9:AD:A5:32";
+
+        //To WOL on TV
+        public void turnOnTv() {
+            new Thread() {
+                @Override
+                public void run() {
+                    String macStr = MAC_WOL_DEVICE;
+                    String ipaddr = IP_WOL_DEVICE;
+                    String ipaddrForTurnOn = IP_MAGIC_WOL_DEVICE;
+//                if (mLastConnectedDeviceIp != null && !mLastConnectedDeviceIp.isEmpty()) {
+//                    ipaddr = mLastConnectedDeviceIp;
+//                    ipaddrForTurnOn = getWolIP(ipaddr);
+//                }
+                    int port = 9;
+                    Log.d(TAG, "start TV Turn On");
+                    try {
+                        byte[] macBytes = getMacBytes(macStr);
+                        byte[] bytes = new byte[6 + 16 * macBytes.length];
+
+                        for (int i = 0; i < 6; i++) {
+                            bytes[i] = (byte) 0xff;
+                        }
+                        for (int i = 6; i < bytes.length; i += macBytes.length) {
+                            System.arraycopy(macBytes, 0, bytes, i, macBytes.length);
+                        }
+                        InetAddress address = InetAddress.getByName(ipaddrForTurnOn);
+                        DatagramPacket packet = new DatagramPacket(bytes, bytes.length, address, port);
+                        DatagramSocket socket = new DatagramSocket();
+                        socket.send(packet);
+                        socket.close();
+                    } catch (Exception e) {
+                        Log.e(TAG, "Fail to send magic packet.", e);
+                    }
+
+                    try {
+                        Thread.sleep(7000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }.start();
+        }
+
+        //To WOL on TV
+        private byte[] getMacBytes(String macStr) throws IllegalArgumentException {
+            byte[] bytes = new byte[6];
+            String[] hex = macStr.split("(\\:|\\-)");
+            if (hex.length != 6) {
+                throw new IllegalArgumentException("Invalid MAC address.");
+            }
+            try {
+                for (int i = 0; i < 6; i++) {
+                    bytes[i] = (byte) Integer.parseInt(hex[i], 16);
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid hex digit in MAC address.");
+            }
+            return bytes;
         }
     }
 }
