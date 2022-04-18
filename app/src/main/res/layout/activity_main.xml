@@ -59,6 +59,7 @@
                     style="@style/SwitchButtonStyle"/>
             </LinearLayout>
         </LinearLayout>
+
         <View
             android:layout_width="match_parent"
             android:layout_height="10dp"/>
@@ -79,7 +80,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Search Hub Devices"/>
+            android:text="Search Sub-Devices"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"/>
+
+        <include
+            android:id="@+id/gateway"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            layout="@layout/gateway"/>
 
         <View
             android:layout_width="match_parent"

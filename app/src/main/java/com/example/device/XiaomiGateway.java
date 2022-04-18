@@ -1,6 +1,10 @@
 package com.example.device;
 
+import android.app.Activity;
 import android.util.Log;
+import android.view.View;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.example.XaapiException;
 import com.example.channel.DirectChannel;
@@ -10,6 +14,7 @@ import com.example.command.ReadCommand;
 import com.example.command.WhoisCommand;
 import com.example.command.WriteCommand;
 import com.example.command.WriteSelfCommand;
+import com.example.lumigateway.R;
 import com.example.reply.GatewayHeartbeat;
 import com.example.reply.GetIdListReply;
 import com.example.reply.ReadReply;
@@ -61,7 +66,8 @@ public class XiaomiGateway {
     private WhoisReply mWhoisReply;
     private String mPassword;
 
-    private boolean TEST_FOR_APP_DEV = true;
+    private boolean TEST_FOR_APP_DEV = false;
+
     private boolean mCipherComplete = false;
     private XiaomiSocket mTestXiaomiSocket;
     private XiaomiMotionSensor mTestXiaomiMotionSensor;
@@ -279,6 +285,8 @@ public class XiaomiGateway {
                 mSubDeviceListener.onSubDevice(sid, device);
             }
 
+            readDevice(sid);
+
             if (TEST_FOR_APP_DEV) {
                 createTestDevice();
             }
@@ -305,6 +313,44 @@ public class XiaomiGateway {
         return builtinIlluminationSensor;
     }
 
+    public void addGatewayView(Activity activity) {
+
+        activity.runOnUiThread(() -> {
+            View deviceGateway = activity.findViewById(R.id.gateway);
+            deviceGateway.setVisibility(View.VISIBLE);
+            XiaomiGatewayLight gatewayLight = getBuiltinLight();
+            TextView gatewaySid = activity.findViewById(R.id.device_gateway_info);
+            gatewaySid.setText("sid: " + getSid());
+            SeekBar brightness = activity.findViewById(R.id.seekbar_brightness);
+            brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                private int progress;
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    this.progress = progress;
+                    Log.d(TAG, "onProgressChanged: " + progress);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    Log.d(TAG, "onStopTrackingTouch: " + ((byte) progress));
+                    new Thread(() -> {
+                        try {
+                            gatewayLight.setBrightness((byte) progress);
+                        } catch (XaapiException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            });
+        });
+    }
+
     private boolean isMyself(String sid) {
         return sid.equals(this.sid);
     }
@@ -312,8 +358,8 @@ public class XiaomiGateway {
     private void updateKey(String token) throws XaapiException {
         if(cipher != null) {
             try {
-                Log.d(TAG, "updateKey - token: " + token);
                 String keyAsHexString = Utility.toHexString(cipher.doFinal(token.getBytes(StandardCharsets.US_ASCII)));
+                Log.d(TAG, "updateKey - token: " + token + " keyAsHexString: " + keyAsHexString);
                 key = Optional.of(keyAsHexString);
             } catch (IllegalBlockSizeException e) {
                 throw new XaapiException("Cipher error: " + e.getMessage());
@@ -357,11 +403,13 @@ public class XiaomiGateway {
 
     void sendDataToDevice(BuiltinDevice device /* just a type marker for overloading */, JsonObject data) throws XaapiException {
         assert device.gateway.equals(this);
-        Log.d(TAG, "sendDataToDevice - key : " + key.isPresent());
+        Log.d(TAG, "sendDataToDevice(BuiltinDevice) - key : " + key.isPresent());
         if(key.isPresent()) {
             try {
                 directChannel.send(new WriteSelfCommand(this, data, key.get()).toBytes());
                 // TODO add handling for expired key
+                String replyString = new String(directChannel.receive());
+                Log.d(TAG, "sendDataToDevice(BuiltinDevice) - received : " + replyString);
             } catch (IOException e) {
                 throw new XaapiException("Network error: " + e.getMessage());
             }

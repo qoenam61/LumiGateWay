@@ -10,11 +10,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.example.XaapiException;
 import com.example.device.SlaveDevice;
 import com.example.device.SmartTv;
 import com.example.device.XiaomiGateway;
+import com.example.device.XiaomiGatewayLight;
 import com.example.device.XiaomiMotionSensor;
 import com.kyleduo.switchbutton.SwitchButton;
 
@@ -28,7 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class HubMainActivity extends AppCompatActivity {
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "HubMainActivity";
     private static final long REPORT_PERIOD = 1000;
     private DeviceListAdapter mDeviceListAdapter;
     private SlaveDeviceAdapter mSlaveDeviceAdapter;
@@ -93,6 +96,8 @@ public class HubMainActivity extends AppCompatActivity {
             }
         });
 
+        View deviceGateway = findViewById(R.id.gateway);
+        deviceGateway.setVisibility(View.GONE);
     }
 
     private XiaomiGateway startGateway(String password) {
@@ -124,6 +129,7 @@ public class HubMainActivity extends AppCompatActivity {
                     Log.d(TAG, "onSubDevice - start startReceivingUpdates");
                     mExecutor = new ThreadPoolExecutor(1, 4, REPORT_PERIOD, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
                     mGateway.startReceivingUpdates(mExecutor);
+                    mGateway.addGatewayView(this);
                 }
             }).start();
         }

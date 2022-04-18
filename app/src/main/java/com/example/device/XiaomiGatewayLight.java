@@ -13,10 +13,10 @@ public class XiaomiGatewayLight extends BuiltinDevice {
 
     private byte brightness;
     private byte previousNonZeroBrightness = 100;
-//    private Color color = Color.BLACK; // TODO decide if this is an appropriate default value
+    private int color = Color.BLACK; // TODO decide if this is an appropriate default value
 
     private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Byte>> brightnessCallbacks = new HashMap<>();
-    private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Color>> colorCallbacks = new HashMap<>();
+    private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Integer>> colorCallbacks = new HashMap<>();
 
     public XiaomiGatewayLight(XiaomiGateway gateway) {
         super(gateway, Type.XiaomiGatewayLight);
@@ -29,14 +29,14 @@ public class XiaomiGatewayLight extends BuiltinDevice {
             int rgb = o.get("rgb").getAsInt();
             byte previousBrightnessValue = brightness;
             brightness = (byte)(rgb >>> 24);
-//            Color previousColorValue = color;
-//            color = new Color(rgb & 0x00FFFFFF);
-//            if(brightness != previousBrightnessValue) {
-//                notifyWithBrightnessChange(brightness);
-//            }
-//            if(! color.equals(previousColorValue)) {
-//                notifyWithColorChange(color);
-//            }
+            int previousColorValue = color;
+            color = rgb & 0x00FFFFFF;
+            if(brightness != previousBrightnessValue) {
+                notifyWithBrightnessChange(brightness);
+            }
+            if(color != previousColorValue) {
+                notifyWithColorChange(color);
+            }
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
         }
@@ -71,7 +71,7 @@ public class XiaomiGatewayLight extends BuiltinDevice {
         }
     }
 
-    public IInteractiveDevice.SubscriptionToken subscribeForColorChange(Consumer<Color> callback) {
+    public IInteractiveDevice.SubscriptionToken subscribeForColorChange(Consumer<Integer> callback) {
         IInteractiveDevice.SubscriptionToken token = new IInteractiveDevice.SubscriptionToken();
         colorCallbacks.put(token, callback);
         return token;
@@ -81,8 +81,8 @@ public class XiaomiGatewayLight extends BuiltinDevice {
         colorCallbacks.remove(token);
     }
 
-    private void notifyWithColorChange(Color value) {
-        for(Consumer<Color> c : colorCallbacks.values()) {
+    private void notifyWithColorChange(int value) {
+        for(Consumer<Integer> c : colorCallbacks.values()) {
             c.accept(value);
         }
     }
@@ -101,18 +101,19 @@ public class XiaomiGatewayLight extends BuiltinDevice {
             previousNonZeroBrightness = this.brightness;
         }
         this.brightness = brightness;
+        setColor(0x00FFFF);
     }
 
-    public void setColor(Color color) throws XaapiException {
+    public void setColor(int color) throws XaapiException {
         writeBrightnessAndColor(this.brightness, color);
 //        this.color = color;
     }
 
-    private void writeBrightnessAndColor(byte brightness, Color color) throws XaapiException {
+    private void writeBrightnessAndColor(byte brightness, int color) throws XaapiException {
         // TODO verify brightness in range 0..100
         JsonObject rgb = new JsonObject();
-        int rgbValue = brightness << 24;
-//        int rgbValue = brightness << 24 | color.getRGB();
+//        int rgbValue = brightness << 24;
+        int rgbValue = brightness << 24 | color;
         rgb.addProperty("rgb", rgbValue);
         gateway.sendDataToDevice(this, rgb);
     }
