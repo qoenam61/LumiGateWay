@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.XaapiException;
 import com.example.device.IInteractiveDevice;
 import com.example.device.SlaveDevice;
+import com.example.device.TradFriBulb;
 import com.example.device.XiaomiDoorWindowSensor;
 import com.example.device.XiaomiMotionSensor;
 import com.example.device.XiaomiSocket;
@@ -65,6 +67,9 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         } else if (viewType == SlaveDevice.Type.XiaomiDoorWindowSensor.ordinal()) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.smart_door_sensor, parent, false);
             return new SmartDoorSensorViewHolder(view);
+        } else if (viewType == SlaveDevice.Type.TradFriBulb.ordinal()) {
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.tradfri_bulb, parent, false);
+            return new TradFriBulbViewHolder(view);
         } else {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.device_list_item, parent, false);
             return new DefaultViewHolder(view);
@@ -73,7 +78,7 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        Log.d(TAG, "onBindViewHolder: ");
+        Log.d(TAG, "onBindViewHolder - position: " + position);
         SlaveDevice device = mDeviceList.get(position);
         if (holder instanceof SmartPlugViewHolder) {
             ((SmartPlugViewHolder)holder).onBind(device);
@@ -81,6 +86,8 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             ((SmartMotionSensorViewHolder)holder).onBind(device);
         } else if (holder instanceof SmartDoorSensorViewHolder) {
             ((SmartDoorSensorViewHolder)holder).onBind(device);
+        } else if (holder instanceof TradFriBulbViewHolder) {
+            ((TradFriBulbViewHolder)holder).onBind(device);
         } else {
             ((DefaultViewHolder)holder).onBind(device);
         }
@@ -276,6 +283,92 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 }
             });
         }*/
+    }
+
+    class TradFriBulbViewHolder extends RecyclerView.ViewHolder {
+        TextView deviceSid;
+        Button buttonOn;
+        Button buttonOff;
+        TradFriBulb tradFriBulb;
+        SwitchButton autoProfile;
+        SeekBar seekBar;
+
+        public TradFriBulbViewHolder(View itemView) {
+            super(itemView);
+            deviceSid = itemView.findViewById(R.id.device_sid);
+            buttonOn = itemView.findViewById(R.id.device_smart_plug_on);
+            buttonOff = itemView.findViewById(R.id.device_smart_plug_off);
+            autoProfile = itemView.findViewById(R.id.button_auto_profile);
+            seekBar = itemView.findViewById(R.id.seekbar_brightness);
+
+            buttonOn.setOnClickListener(v -> {
+                tradfriBulbOnOff(tradFriBulb, true);
+            });
+
+            buttonOff.setOnClickListener(v -> {
+                tradfriBulbOnOff(tradFriBulb, false);
+            });
+        }
+
+        void onBind(SlaveDevice device) {
+            tradFriBulb = (TradFriBulb)device;
+            deviceSid.setText(device.getSid());
+            tradFriBulb.subscribeForActions(new Consumer<String>() {
+                @Override
+                public void accept(String s) {
+                    Log.d(TAG, "accept: " + s);
+                    mListener.onSmartPlug(device, s);
+                }
+            });
+
+            autoProfile.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if (mListener != null && tradFriBulb != null) {
+                        mListener.onAddProfile(tradFriBulb, tradFriBulb.getShortId(), isChecked);
+                    }
+                }
+            });
+
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                private int progress;
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    this.progress = progress;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    new Thread(() -> {
+                        try {
+                            tradFriBulb.changeBrightness(progress);
+                        } catch (XaapiException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            });
+        }
+
+        private void tradfriBulbOnOff(TradFriBulb bulb, boolean on) {
+            new Thread(() -> {
+                try {
+                    Log.d(TAG, "onClick: turnOn");
+                    if (on) {
+                        bulb.turnOn();
+                    } else {
+                        bulb.turnOff();
+                    }
+                } catch (XaapiException e) {
+                    Log.e(TAG, "onBind: ", e);
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     public ArrayList<SlaveDevice> getDeviceList() {

@@ -180,41 +180,40 @@ public class XiaomiGateway {
         //TEST CODE
         if (TEST_FOR_APP_DEV) {
             Log.d(TAG, "[TEST_FOR_APP_DEV] queryDevices: testXiaomiSocket");
-            SlaveDevice device1 = testXiaomiSocket("123456789", (short) 1111);
-            knownDevices.put("123456789", device1);
-            mSubDeviceListener.onSubDevice("123456789", device1);
+            SlaveDevice device1 = testXiaomiSocket("11111111", (short) 1111);
+            knownDevices.put("11111111", device1);
+            mSubDeviceListener.onSubDevice("11111111", device1);
 
-            SlaveDevice device2 = testXiaomiMotionSensor("9874654321", (short) 2222);
-            knownDevices.put("9874654321", device2);
-            mSubDeviceListener.onSubDevice("987654321", device2);
+            SlaveDevice device2 = testXiaomiMotionSensor("22222222", (short) 2222);
+            knownDevices.put("22222222", device2);
+            mSubDeviceListener.onSubDevice("22222222", device2);
 
-            SlaveDevice device3 = testXiaomiDoorSensor("123789456", (short) 3333);
-            knownDevices.put("123789456", device3);
-            mSubDeviceListener.onSubDevice("123789456", device3);
+            SlaveDevice device3 = testXiaomiDoorSensor("33333333", (short) 3333);
+            knownDevices.put("33333333", device3);
+            mSubDeviceListener.onSubDevice("33333333", device3);
 
-            SlaveDevice device4 = testXiaomiSocket("456789123", (short) 4444);
-            knownDevices.put("456789123", device4);
-            mSubDeviceListener.onSubDevice("456789123", device4);
-
-            SlaveDevice device5 = testXiaomiMotionSensor("963852741", (short) 5555);
-            knownDevices.put("963852741", device5);
-            mSubDeviceListener.onSubDevice("963852741", device5);
+            SlaveDevice device5 = testTradfriBulb("44444444", (short) 5555);
+            knownDevices.put("44444444", device5);
+            mSubDeviceListener.onSubDevice("44444444", device5);
 
             new Thread(() -> {
                 try {
                     Thread.sleep(10000);
 
                     Thread.sleep(5000);
-                    getDevice("9874654321").update("{\"status\":\"motion\"}");
+                    getDevice("22222222").update("{\"status\":\"motion\"}");
 
                     Thread.sleep(5000);
-                    getDevice("9874654321").update("{\"status\":\"off\"}");
+                    getDevice("11111111").update("{\"status\":\"off\"}");
 
                     Thread.sleep(5000);
-                    getDevice("123789456").update("{\"status\":\"close\"}");
+                    getDevice("11111111").update("{\"status\":\"on\"}");
 
                     Thread.sleep(5000);
-                    getDevice("123789456").update("{\"status\":\"open\"}");
+                    getDevice("33333333").update("{\"status\":\"close\"}");
+
+                    Thread.sleep(5000);
+                    getDevice("33333333").update("{\"status\":\"open\"}");
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -371,6 +370,10 @@ public class XiaomiGateway {
         return new XiaomiDoorWindowSensor(this, sid, shortId);
     }
 
+    public SlaveDevice testTradfriBulb(String sid, short shortId) {
+        return new TradFriBulb(this, sid, shortId);
+    }
+
     private SlaveDevice readDevice(String sid) throws XaapiException {
         try {
             directChannel.send(new ReadCommand(sid).toBytes());
@@ -399,6 +402,9 @@ public class XiaomiGateway {
                     XiaomiSwitchButton button = new XiaomiSwitchButton(this, sid);
                     button.update(reply.data);
                     return button;
+                case "tradfri": // check device type!!
+                    TradFriBulb tradFriBulb = new TradFriBulb(this, sid, SlaveDevice.Type.TradFriBulb, Short.parseShort(reply.short_id));
+                    return tradFriBulb;
                 case "sensor_ht":
                     DefaultSlaveDevice sensorHT = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Sensor_HT);
                     return sensorHT;
