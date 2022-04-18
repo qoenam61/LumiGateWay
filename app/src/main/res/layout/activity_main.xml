@@ -63,6 +63,17 @@
             android:layout_width="match_parent"
             android:layout_height="20dp"/>
 
+        <include
+            android:id="@+id/device_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            layout="@layout/device_smart_tv"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="20dp"/>
+        
         <Button
             android:id="@+id/send_button"
             android:layout_width="wrap_content"
@@ -87,17 +98,6 @@
             android:background="@android:color/darker_gray">
 
         </androidx.recyclerview.widget.RecyclerView>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="20dp"/>
-
-        <include
-            android:id="@+id/device_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            layout="@layout/device_smart_tv"/>
 
         <View
             android:layout_width="match_parent"
