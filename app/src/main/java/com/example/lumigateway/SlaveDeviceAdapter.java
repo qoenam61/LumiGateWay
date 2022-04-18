@@ -254,10 +254,10 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                     mActivity.runOnUiThread(() -> {
                         if (s.equals("close")) {
                             reportText.setText("Close");
-                            motionSign.setBackgroundColor(Color.BLUE);
+                            motionSign.setBackgroundColor(Color.RED);
                         } else {
                             reportText.setText("Open");
-                            motionSign.setBackgroundColor(Color.RED);
+                            motionSign.setBackgroundColor(Color.BLUE);
                         }
                     });
                 }
@@ -318,6 +318,19 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 public void accept(String s) {
                     Log.d(TAG, "accept: " + s);
                     mListener.onSmartPlug(device, s);
+                }
+            });
+
+            tradFriBulb.subscribeForBrightness(new Consumer<Integer>() {
+                @Override
+                public void accept(Integer integer) {
+                    Log.d(TAG, "accept - Brightness: "+ integer);
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            seekBar.setProgress(integer);
+                        }
+                    });
                 }
             });
 

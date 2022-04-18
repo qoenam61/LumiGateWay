@@ -21,6 +21,7 @@ public class TradFriBulb extends SlaveDevice implements IInteractiveDevice {
 
     private XiaomiSocket.Action lastAction;
     private HashMap<SubscriptionToken, Consumer<String>> actionsCallbacks = new HashMap<>();
+    private HashMap<SubscriptionToken, Consumer<Integer>> brightnessCallbacks = new HashMap<>();
 
     private String mBrightness;
 
@@ -57,8 +58,10 @@ public class TradFriBulb extends SlaveDevice implements IInteractiveDevice {
                 }
                 notifyWithAction(action);
             } else if (o.has("brightness")) {
+                Log.d(TAG, "update - brightness: ");
                 String brightness = o.get("brightness").getAsString();
                 mBrightness = brightness;
+                notifyWithBrightness(Integer.parseInt(brightness));
             }
         } catch (XaapiException e) {
             e.printStackTrace();
@@ -84,7 +87,6 @@ public class TradFriBulb extends SlaveDevice implements IInteractiveDevice {
                     brightness -= 20;
                     changeBrightness(brightness);
                     Thread.sleep(1000);
-
                 }
             } catch (XaapiException | InterruptedException e) {
                 Log.e(TAG, "onBind: ", e);
@@ -118,5 +120,25 @@ public class TradFriBulb extends SlaveDevice implements IInteractiveDevice {
         JsonObject bright = new JsonObject();
         bright.addProperty("brightness", String.valueOf(brightness));
         gateway.sendDataToDevice(this, bright);
+    }
+
+    public Map<SubscriptionToken, Consumer<Integer>> getBrightnessCallbacks() {
+        return brightnessCallbacks;
+    }
+
+    public SubscriptionToken subscribeForBrightness(Consumer<Integer> callback) {
+        SubscriptionToken token = new SubscriptionToken();
+        getBrightnessCallbacks().put(token, callback);
+        return token;
+    }
+
+    public void unsubscribeForBrightness(SubscriptionToken token) {
+        getBrightnessCallbacks().remove(token);
+    }
+
+    public void notifyWithBrightness(int brightness) {
+        for(Consumer<Integer> c : getBrightnessCallbacks().values()) {
+            c.accept(brightness);
+        }
     }
 }

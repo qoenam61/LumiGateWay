@@ -63,6 +63,10 @@ public class XiaomiGateway {
 
     private boolean TEST_FOR_APP_DEV = true;
     private boolean mCipherComplete = false;
+    private XiaomiSocket mTestXiaomiSocket;
+    private XiaomiMotionSensor mTestXiaomiMotionSensor;
+    private XiaomiDoorWindowSensor mTestXiaomiDoorSensor;
+    private TradFriBulb mTestTradfriBulb;
 
     public interface onFoundSubDevice {
         void onSubDevice(String sid, SlaveDevice deviceInfo);
@@ -178,49 +182,46 @@ public class XiaomiGateway {
 
     public void createTestDevice() throws InterruptedException {
         //TEST CODE
-        if (TEST_FOR_APP_DEV) {
-            Log.d(TAG, "[TEST_FOR_APP_DEV] queryDevices: testXiaomiSocket");
-            SlaveDevice device1 = testXiaomiSocket("11111111", (short) 1111);
-            knownDevices.put("11111111", device1);
-            mSubDeviceListener.onSubDevice("11111111", device1);
+        Log.d(TAG, "[TEST_FOR_APP_DEV] queryDevices: testXiaomiSocket");
+        SlaveDevice device1 = testXiaomiSocket("11111111", (short) 1111);
+        knownDevices.put("11111111", device1);
+        mSubDeviceListener.onSubDevice("11111111", device1);
 
-            SlaveDevice device2 = testXiaomiMotionSensor("22222222", (short) 2222);
-            knownDevices.put("22222222", device2);
-            mSubDeviceListener.onSubDevice("22222222", device2);
+        SlaveDevice device2 = testXiaomiMotionSensor("22222222", (short) 2222);
+        knownDevices.put("22222222", device2);
+        mSubDeviceListener.onSubDevice("22222222", device2);
 
-            SlaveDevice device3 = testXiaomiDoorSensor("33333333", (short) 3333);
-            knownDevices.put("33333333", device3);
-            mSubDeviceListener.onSubDevice("33333333", device3);
+        SlaveDevice device3 = testXiaomiDoorSensor("33333333", (short) 3333);
+        knownDevices.put("33333333", device3);
+        mSubDeviceListener.onSubDevice("33333333", device3);
 
-            SlaveDevice device5 = testTradfriBulb("44444444", (short) 5555);
-            knownDevices.put("44444444", device5);
-            mSubDeviceListener.onSubDevice("44444444", device5);
+        SlaveDevice device5 = testTradfriBulb("44444444", (short) 5555);
+        knownDevices.put("44444444", device5);
+        mSubDeviceListener.onSubDevice("44444444", device5);
 
-            new Thread(() -> {
-                try {
-                    Thread.sleep(10000);
+        new Thread(() -> {
+            try {
+                Thread.sleep(10000);
 
-                    Thread.sleep(5000);
-                    getDevice("22222222").update("{\"status\":\"motion\"}");
+                Thread.sleep(5000);
+                getDevice("22222222").update("{\"status\":\"motion\"}");
 
-                    Thread.sleep(5000);
-                    getDevice("11111111").update("{\"status\":\"off\"}");
+                Thread.sleep(5000);
+                getDevice("11111111").update("{\"status\":\"off\"}");
 
-                    Thread.sleep(5000);
-                    getDevice("11111111").update("{\"status\":\"on\"}");
+                Thread.sleep(5000);
+                getDevice("11111111").update("{\"status\":\"on\"}");
 
-                    Thread.sleep(5000);
-                    getDevice("33333333").update("{\"status\":\"close\"}");
+                Thread.sleep(5000);
+                getDevice("33333333").update("{\"status\":\"close\"}");
 
-                    Thread.sleep(5000);
-                    getDevice("33333333").update("{\"status\":\"open\"}");
+                Thread.sleep(5000);
+                getDevice("33333333").update("{\"status\":\"open\"}");
 
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-
-        }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public String getPassword() {
@@ -325,9 +326,20 @@ public class XiaomiGateway {
     }
 
     void sendDataToDevice(SlaveDevice device, JsonObject data) throws XaapiException {
-        Log.d(TAG, "sendDataToDevice - key : " + key.isPresent());
+        Log.d(TAG, "sendDataToDevice - key : " + key.isPresent() + " data: " + data);
         if(key.isPresent()) {
             try {
+                if (TEST_FOR_APP_DEV) {
+                    if (device instanceof XiaomiSocket) {
+                        ((XiaomiSocket)device).update(data.toString());
+                    } else if (device instanceof XiaomiMotionSensor) {
+                        ((XiaomiMotionSensor)device).update(data.toString());
+                    } else if (device instanceof XiaomiDoorWindowSensor) {
+                        ((XiaomiDoorWindowSensor)device).update(data.toString());
+                    } else if (device instanceof TradFriBulb) {
+                        ((TradFriBulb)device).update(data.toString());
+                    }
+                }
                 WriteCommand command = new WriteCommand(device, data, key.get());
                 Log.d(TAG, "sendDataToDevice - sid: " +device.getSid() + " type: " + device.getType().name() + " data: " + command.getString());
                 directChannel.send(command.toBytes());
@@ -359,19 +371,35 @@ public class XiaomiGateway {
     }
 
     public SlaveDevice testXiaomiSocket(String sid, short shortId) {
-        return new XiaomiSocket(this, sid, shortId);
+        XiaomiSocket testXiaomi = mTestXiaomiSocket;
+        if (testXiaomi == null) {
+            mTestXiaomiSocket = new XiaomiSocket(this, sid, shortId);
+        }
+        return mTestXiaomiSocket;
     }
 
     public SlaveDevice testXiaomiMotionSensor(String sid, short shortId) {
-        return new XiaomiMotionSensor(this, sid, shortId);
+        XiaomiMotionSensor testXiaomi = mTestXiaomiMotionSensor;
+        if (testXiaomi == null) {
+            mTestXiaomiMotionSensor = new XiaomiMotionSensor(this, sid, shortId);
+        }
+        return mTestXiaomiMotionSensor;
     }
 
     public SlaveDevice testXiaomiDoorSensor(String sid, short shortId) {
-        return new XiaomiDoorWindowSensor(this, sid, shortId);
+        XiaomiDoorWindowSensor testXiaomi = mTestXiaomiDoorSensor;
+        if (testXiaomi == null) {
+            mTestXiaomiDoorSensor = new XiaomiDoorWindowSensor(this, sid, shortId);
+        }
+        return mTestXiaomiDoorSensor;
     }
 
     public SlaveDevice testTradfriBulb(String sid, short shortId) {
-        return new TradFriBulb(this, sid, shortId);
+        TradFriBulb testXiaomi = mTestTradfriBulb;
+        if (testXiaomi == null) {
+            mTestTradfriBulb = new TradFriBulb(this, sid, shortId);
+        }
+        return mTestTradfriBulb;
     }
 
     private SlaveDevice readDevice(String sid) throws XaapiException {
@@ -404,6 +432,7 @@ public class XiaomiGateway {
                     return button;
                 case "tradfri": // check device type!!
                     TradFriBulb tradFriBulb = new TradFriBulb(this, sid, SlaveDevice.Type.TradFriBulb, Short.parseShort(reply.short_id));
+                    tradFriBulb.update(reply.data);
                     return tradFriBulb;
                 case "sensor_ht":
                     DefaultSlaveDevice sensorHT = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Sensor_HT);
