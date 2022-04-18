@@ -8,7 +8,7 @@ public class ReadCommand implements ICommand {
 
     public ReadCommand(String sid) {
         this.sid = sid;
-        read = new String("{\"cmd\":\"read\", \"sid\":\""+ sid +"\"}");
+        read = "{\"cmd\":\"read\", \"sid\":\""+ sid +"\"}";
     }
 
     @Override

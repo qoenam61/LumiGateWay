@@ -317,18 +317,22 @@ public class XiaomiGateway {
 
         activity.runOnUiThread(() -> {
             View deviceGateway = activity.findViewById(R.id.gateway);
-            deviceGateway.setVisibility(View.VISIBLE);
+            TextView gatewayInfo = deviceGateway.findViewById(R.id.device_gateway_info);
+            TextView titleBrightness = deviceGateway.findViewById(R.id.title_brightness);
+            SeekBar brightness = deviceGateway.findViewById(R.id.seekbar_brightness);
+            gatewayInfo.setVisibility(View.VISIBLE);
+            titleBrightness.setVisibility(View.VISIBLE);
+            brightness.setVisibility(View.VISIBLE);
+
             XiaomiGatewayLight gatewayLight = getBuiltinLight();
             TextView gatewaySid = activity.findViewById(R.id.device_gateway_info);
             gatewaySid.setText("sid: " + getSid());
-            SeekBar brightness = activity.findViewById(R.id.seekbar_brightness);
             brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 private int progress;
 
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                     this.progress = progress;
-                    Log.d(TAG, "onProgressChanged: " + progress);
                 }
 
                 @Override
@@ -406,10 +410,11 @@ public class XiaomiGateway {
         Log.d(TAG, "sendDataToDevice(BuiltinDevice) - key : " + key.isPresent());
         if(key.isPresent()) {
             try {
-                directChannel.send(new WriteSelfCommand(this, data, key.get()).toBytes());
+                WriteSelfCommand sendCommand = new WriteSelfCommand(this, data, key.get());
+                directChannel.send(sendCommand.toBytes());
                 // TODO add handling for expired key
-                String replyString = new String(directChannel.receive());
-                Log.d(TAG, "sendDataToDevice(BuiltinDevice) - received : " + replyString);
+//                String replyString = new String(directChannel.receive());
+//                Log.d(TAG, "sendDataToDevice(BuiltinDevice) - received : " + replyString);
             } catch (IOException e) {
                 throw new XaapiException("Network error: " + e.getMessage());
             }

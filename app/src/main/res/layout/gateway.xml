@@ -13,16 +13,19 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
+        android:padding="5dp"
         android:background="@android:color/darker_gray">
         <TextView
             android:id="@+id/device_gateway_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"
+            android:layout_marginBottom="5dp"
             android:layout_gravity="start"
-            android:text="sid : xxx.xxx.xxx.xx"/>
+            android:text="sid : "/>
 
         <TextView
+            android:id="@+id/title_brightness"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"

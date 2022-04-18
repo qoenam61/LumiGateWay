@@ -13,8 +13,8 @@ public class WriteSelfCommand implements ICommand {
     public WriteSelfCommand(XiaomiGateway gateway, JsonObject data, String key) {
         this.gateway = gateway;
         this.data = data;
-        what = "{{\"cmd\":\"write\", \"sid\":\""+ gateway.getSid() +"\", \"data\":" + data + "}}";
         data.addProperty("key", key);
+        what = "{{\"cmd\":\"write\", \"sid\":\""+ gateway.getSid() +"\", \"data\":" + data + "}}";
     }
 
     @Override

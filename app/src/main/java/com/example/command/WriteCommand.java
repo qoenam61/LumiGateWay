@@ -3,6 +3,9 @@ package com.example.command;
 import com.example.device.SlaveDevice;
 import com.google.gson.JsonObject;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.nio.charset.StandardCharsets;
 
 public class WriteCommand implements ICommand {
@@ -13,8 +16,8 @@ public class WriteCommand implements ICommand {
     public WriteCommand(SlaveDevice device, JsonObject data, String key) {
         this.device = device;
         this.data = data;
-        what = "{{\"cmd\":\"write\", \"sid\":\""+ device.getSid() +"\", \"data\":" + data + "}}";
         data.addProperty("key", key);
+        what = "{{\"cmd\":\"write\", \"sid\":\""+ device.getSid() +"\", \"data\":" + data + "}}";
     }
 
     @Override

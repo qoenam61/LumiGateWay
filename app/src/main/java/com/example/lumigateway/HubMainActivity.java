@@ -96,8 +96,13 @@ public class HubMainActivity extends AppCompatActivity {
             }
         });
 
-        View deviceGateway = findViewById(R.id.gateway);
-        deviceGateway.setVisibility(View.GONE);
+        TextView gatewayInfo = findViewById(R.id.device_gateway_info);
+        TextView titleBrightness = findViewById(R.id.title_brightness);
+        SeekBar brightness = findViewById(R.id.seekbar_brightness);
+
+        gatewayInfo.setVisibility(View.INVISIBLE);
+        titleBrightness.setVisibility(View.INVISIBLE);
+        brightness.setVisibility(View.INVISIBLE);
     }
 
     private XiaomiGateway startGateway(String password) {
