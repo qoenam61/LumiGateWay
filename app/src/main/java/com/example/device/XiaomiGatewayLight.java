@@ -92,14 +92,16 @@ public class XiaomiGatewayLight extends BuiltinDevice {
 
     public void setOn(boolean on) throws XaapiException {
         if(on) {
-            setBrightness(previousNonZeroBrightness);
+            setBrightness(previousNonZeroBrightness, true);
         } else {
-            setBrightness((byte)0);
+            setBrightness((byte)0, true);
         }
     }
 
-    public void setBrightness(byte brightness) throws XaapiException {
-        writeBrightnessAndColor(brightness, this.color);
+    public void setBrightness(byte brightness, boolean send) throws XaapiException {
+        if (send) {
+            writeBrightnessAndColor(brightness, this.color);
+        }
         if(this.brightness != 0) {
             previousNonZeroBrightness = this.brightness;
         }
@@ -117,6 +119,12 @@ public class XiaomiGatewayLight extends BuiltinDevice {
 
         color = Color.rgb(colorR, colorG, colorB);
         writeBrightnessAndColor(this.brightness, color);
+    }
+
+    public void setColor(int color) {
+        colorR = Color.red(color);
+        colorG = Color.green(color);
+        colorB = Color.blue(color);
     }
 
     private void writeBrightnessAndColor(byte brightness, int color) throws XaapiException {

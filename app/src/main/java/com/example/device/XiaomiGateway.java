@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 public class XiaomiGateway {
     private static final String TAG = "XiaomiGateway";
@@ -245,6 +246,24 @@ public class XiaomiGateway {
     private void configureBuiltinDevices() {
         builtinLight = new XiaomiGatewayLight(this);
         builtinIlluminationSensor = new XiaomiGatewayIlluminationSensor(this);
+
+        builtinLight.subscribeForBrightnessChange(new Consumer<Byte>() {
+            @Override
+            public void accept(Byte aByte) {
+                try {
+                    builtinLight.setBrightness(aByte, false);
+                } catch (XaapiException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        builtinLight.subscribeForColorChange(new Consumer<Integer>() {
+            @Override
+            public void accept(Integer integer) {
+                builtinLight.setColor(integer);
+            }
+        });
     }
 
     private void configureCipher(String password) throws XaapiException {
@@ -355,7 +374,7 @@ public class XiaomiGateway {
                     Log.d(TAG, "onStopTrackingTouch: " + ((byte) progress));
                     new Thread(() -> {
                         try {
-                            gatewayLight.setBrightness((byte) progress);
+                            gatewayLight.setBrightness((byte) progress, true);
                         } catch (XaapiException e) {
                             e.printStackTrace();
                         }
