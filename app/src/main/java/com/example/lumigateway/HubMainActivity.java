@@ -59,6 +59,7 @@ public class HubMainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case SHOW_PROGRESS_DIALOG:
                     mProgress = new ProgressDialog(HubMainActivity.this);
+                    mProgress.setTitle("Sending Query ...");
                     mProgress.show();
                     break;
                 case DISMISS_PROGRESS_DIALOG:
