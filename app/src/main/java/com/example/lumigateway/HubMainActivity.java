@@ -1,10 +1,15 @@
 package com.example.lumigateway;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -33,6 +38,10 @@ import java.util.concurrent.TimeUnit;
 public class HubMainActivity extends AppCompatActivity {
     private static final String TAG = "HubMainActivity";
     private static final long REPORT_PERIOD = 1000;
+
+    public static final int SHOW_PROGRESS_DIALOG = 1;
+    public static final int DISMISS_PROGRESS_DIALOG = 2;
+
     private DeviceListAdapter mDeviceListAdapter;
     private SlaveDeviceAdapter mSlaveDeviceAdapter;
     private XiaomiGateway mGateway;
@@ -40,6 +49,24 @@ public class HubMainActivity extends AppCompatActivity {
     private static final String PASSWORD = "1ccocfmmli41trb5";
     private boolean mEnableAutoProfile;
     private MyAutoProfile mMyProfile;
+
+    private ProgressDialog mProgress;
+
+    Handler mHandler = new Handler(Looper.getMainLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case SHOW_PROGRESS_DIALOG:
+                    mProgress = new ProgressDialog(HubMainActivity.this);
+                    mProgress.show();
+                    break;
+                case DISMISS_PROGRESS_DIALOG:
+                    mProgress.dismiss();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +157,7 @@ public class HubMainActivity extends AppCompatActivity {
                             mSlaveDeviceAdapter.notifyDataSetChanged();
                         });
                     };
-                    mGateway = XiaomiGateway.discover(listener);
+                    mGateway = XiaomiGateway.discover(this, mHandler, listener);
                     if (password != null && !password.isEmpty()) {
                         mGateway.configurePassword(password);
                     }

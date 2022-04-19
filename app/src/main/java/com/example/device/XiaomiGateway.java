@@ -1,6 +1,8 @@
 package com.example.device;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
@@ -44,6 +46,9 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import static com.example.lumigateway.HubMainActivity.DISMISS_PROGRESS_DIALOG;
+import static com.example.lumigateway.HubMainActivity.SHOW_PROGRESS_DIALOG;
+
 public class XiaomiGateway {
     private static final String TAG = "XiaomiGateway";
     private static final String GROUP = "224.0.0.50";
@@ -54,6 +59,9 @@ public class XiaomiGateway {
         (byte)0xba,       0x69, 0x5a, 0x2e, 0x6f, 0x58,       0x56,       0x2e};
 
     private static final Gson GSON = new Gson();
+
+    private static Handler mHandler;
+    private static Activity mActivity;
 
     private String sid;
     private Optional<String> key = Optional.empty();
@@ -74,6 +82,8 @@ public class XiaomiGateway {
     private XiaomiMotionSensor mTestXiaomiMotionSensor;
     private XiaomiDoorWindowSensor mTestXiaomiDoorSensor;
     private TradFriBulb mTestTradfriBulb;
+
+    private ProgressDialog mProgress;
 
     public interface onFoundSubDevice {
         void onSubDevice(String sid, SlaveDevice deviceInfo);
@@ -98,8 +108,11 @@ public class XiaomiGateway {
         return new XiaomiGateway(reply);
     }
 
-    public static XiaomiGateway discover(onFoundSubDevice listener) throws IOException, XaapiException {
+    public static XiaomiGateway discover(Activity activity, Handler handler, onFoundSubDevice listener) throws IOException, XaapiException {
         // TODO discover more than one gateway
+        mActivity = activity;
+        mHandler = handler;
+
         DirectChannel discoveryChannel = new DirectChannel(GROUP, PORT_DISCOVERY);
         WhoisCommand cmd = new WhoisCommand();
         Log.d(TAG, "discover - sending ... " + cmd.getString());
@@ -289,6 +302,9 @@ public class XiaomiGateway {
 
     private void queryDevices() throws XaapiException {
         try {
+
+            mHandler.sendEmptyMessage(SHOW_PROGRESS_DIALOG);
+
             GetIdListCommand queryDeviceString = new GetIdListCommand();
             Log.d(TAG, "queryDevices - sending ... : " + queryDeviceString.getCmdString());
             directChannel.send(queryDeviceString.toBytes());
@@ -472,6 +488,9 @@ public class XiaomiGateway {
                 String keyAsHexString = Utility.toHexString(cipher.doFinal(token.getBytes(StandardCharsets.US_ASCII)));
                 Log.d(TAG, "updateKey - token: " + token + " keyAsHexString: " + keyAsHexString);
                 key = Optional.of(keyAsHexString);
+
+                mHandler.sendEmptyMessage(DISMISS_PROGRESS_DIALOG);
+
             } catch (IllegalBlockSizeException e) {
                 throw new XaapiException("Cipher error: " + e.getMessage());
             } catch (BadPaddingException e) {
