@@ -14,6 +14,9 @@ public class XiaomiGatewayLight extends BuiltinDevice {
     private byte brightness;
     private byte previousNonZeroBrightness = 100;
     private int color = Color.BLACK; // TODO decide if this is an appropriate default value
+    private int colorR = Color.RED; // TODO decide if this is an appropriate default value
+    private int colorG = Color.GREEN; // TODO decide if this is an appropriate default value
+    private int colorB = Color.BLUE; // TODO decide if this is an appropriate default value
 
     private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Byte>> brightnessCallbacks = new HashMap<>();
     private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Integer>> colorCallbacks = new HashMap<>();
@@ -104,9 +107,16 @@ public class XiaomiGatewayLight extends BuiltinDevice {
 //        setColor(0x00FFFF); // BLUE
     }
 
-    public void setColor(int color) throws XaapiException {
+    public void setColor(int r, int g, int b) throws XaapiException {
+        int rColor = r == -1 ? colorR : r;
+        int gColor = g == -1 ? colorG : g;
+        int bColor = b == -1 ? colorB : b;
+        colorR = rColor;
+        colorG = gColor;
+        colorB = bColor;
+
+        color = Color.rgb(colorR, colorG, colorB);
         writeBrightnessAndColor(this.brightness, color);
-        this.color = color;
     }
 
     private void writeBrightnessAndColor(byte brightness, int color) throws XaapiException {

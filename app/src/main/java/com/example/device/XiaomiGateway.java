@@ -319,14 +319,24 @@ public class XiaomiGateway {
             View deviceGateway = activity.findViewById(R.id.gateway);
             TextView gatewayInfo = deviceGateway.findViewById(R.id.device_gateway_info);
             TextView titleBrightness = deviceGateway.findViewById(R.id.title_brightness);
+            TextView titleColor = deviceGateway.findViewById(R.id.title_color);
             SeekBar brightness = deviceGateway.findViewById(R.id.seekbar_brightness);
+            SeekBar colorR = deviceGateway.findViewById(R.id.seekbar_color_r);
+            SeekBar colorG = deviceGateway.findViewById(R.id.seekbar_color_g);
+            SeekBar colorB = deviceGateway.findViewById(R.id.seekbar_color_b);
+
             gatewayInfo.setVisibility(View.VISIBLE);
             titleBrightness.setVisibility(View.VISIBLE);
+            titleColor.setVisibility(View.VISIBLE);
             brightness.setVisibility(View.VISIBLE);
+            colorR.setVisibility(View.VISIBLE);
+            colorG.setVisibility(View.VISIBLE);
+            colorB.setVisibility(View.VISIBLE);
+
 
             XiaomiGatewayLight gatewayLight = getBuiltinLight();
             TextView gatewaySid = activity.findViewById(R.id.device_gateway_info);
-            gatewaySid.setText("sid: " + getSid());
+            gatewaySid.setText("Sid: " + getSid());
             brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 private int progress;
 
@@ -346,6 +356,84 @@ public class XiaomiGateway {
                     new Thread(() -> {
                         try {
                             gatewayLight.setBrightness((byte) progress);
+                        } catch (XaapiException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            });
+
+            colorR.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                private int progress;
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    this.progress = progress;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    Log.d(TAG, "onStopTrackingTouch - r: " + progress);
+                    new Thread(() -> {
+                        try {
+                            gatewayLight.setColor(progress, -1, -1);
+                        } catch (XaapiException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            });
+
+            colorG.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                private int progress;
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    this.progress = progress;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    Log.d(TAG, "onStopTrackingTouch - g: " + progress);
+                    new Thread(() -> {
+                        try {
+                            gatewayLight.setColor(-1, progress, -1);
+                        } catch (XaapiException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
+                }
+            });
+
+            colorB.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                private int progress;
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    this.progress = progress;
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    Log.d(TAG, "onStopTrackingTouch - b: " + progress);
+                    new Thread(() -> {
+                        try {
+                            gatewayLight.setColor(-1, -1, progress);
                         } catch (XaapiException e) {
                             e.printStackTrace();
                         }
@@ -413,8 +501,8 @@ public class XiaomiGateway {
                 WriteSelfCommand sendCommand = new WriteSelfCommand(this, data, key.get());
                 directChannel.send(sendCommand.toBytes());
                 // TODO add handling for expired key
-//                String replyString = new String(directChannel.receive());
-//                Log.d(TAG, "sendDataToDevice(BuiltinDevice) - received : " + replyString);
+                String replyString = new String(directChannel.receive());
+                Log.d(TAG, "sendDataToDevice(BuiltinDevice) - received : " + replyString);
             } catch (IOException e) {
                 throw new XaapiException("Network error: " + e.getMessage());
             }

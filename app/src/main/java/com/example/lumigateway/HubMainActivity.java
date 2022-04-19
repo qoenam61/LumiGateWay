@@ -98,11 +98,19 @@ public class HubMainActivity extends AppCompatActivity {
 
         TextView gatewayInfo = findViewById(R.id.device_gateway_info);
         TextView titleBrightness = findViewById(R.id.title_brightness);
+        TextView titleColor = findViewById(R.id.title_color);
         SeekBar brightness = findViewById(R.id.seekbar_brightness);
+        SeekBar colorR = findViewById(R.id.seekbar_color_r);
+        SeekBar colorG = findViewById(R.id.seekbar_color_g);
+        SeekBar colorB = findViewById(R.id.seekbar_color_b);
 
         gatewayInfo.setVisibility(View.INVISIBLE);
         titleBrightness.setVisibility(View.INVISIBLE);
+        titleColor.setVisibility(View.INVISIBLE);
         brightness.setVisibility(View.INVISIBLE);
+        colorR.setVisibility(View.INVISIBLE);
+        colorG.setVisibility(View.INVISIBLE);
+        colorB.setVisibility(View.INVISIBLE);
     }
 
     private XiaomiGateway startGateway(String password) {
