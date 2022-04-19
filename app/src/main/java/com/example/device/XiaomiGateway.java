@@ -223,23 +223,24 @@ public class XiaomiGateway {
 
         new Thread(() -> {
             try {
-                Thread.sleep(10000);
+                while (true) {
+                    Thread.sleep(10000);
 
-                Thread.sleep(5000);
-                getDevice("22222222").update("{\"status\":\"motion\"}");
+                    Thread.sleep(5000);
+                    getDevice("22222222").update("{\"status\":\"motion\"}");
 
-                Thread.sleep(5000);
-                getDevice("11111111").update("{\"status\":\"off\"}");
+                    Thread.sleep(5000);
+                    getDevice("11111111").update("{\"status\":\"off\"}");
 
-                Thread.sleep(5000);
-                getDevice("11111111").update("{\"status\":\"on\"}");
+                    Thread.sleep(5000);
+                    getDevice("11111111").update("{\"status\":\"on\"}");
 
-                Thread.sleep(5000);
-                getDevice("33333333").update("{\"status\":\"close\"}");
+                    Thread.sleep(5000);
+                    getDevice("33333333").update("{\"status\":\"close\"}");
 
-                Thread.sleep(5000);
-                getDevice("33333333").update("{\"status\":\"open\"}");
-
+                    Thread.sleep(5000);
+                    getDevice("33333333").update("{\"status\":\"open\"}");
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
