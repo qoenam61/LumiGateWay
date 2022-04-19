@@ -1,10 +1,15 @@
 package com.example.device;
 
+import android.app.Activity;
 import android.graphics.Color;
+import android.util.Log;
+import android.widget.CompoundButton;
 
 import com.example.XaapiException;
+import com.example.lumigateway.R;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.kyleduo.switchbutton.SwitchButton;
 
 import java.util.HashMap;
 import java.util.function.Consumer;
@@ -21,8 +26,19 @@ public class XiaomiGatewayLight extends BuiltinDevice {
     private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Byte>> brightnessCallbacks = new HashMap<>();
     private HashMap<IInteractiveDevice.SubscriptionToken, Consumer<Integer>> colorCallbacks = new HashMap<>();
 
+    private Activity mActivity;
+    private boolean mAutoProfileCheck;
+
     public XiaomiGatewayLight(XiaomiGateway gateway) {
         super(gateway, Type.XiaomiGatewayLight);
+        mActivity = gateway.getActivity();
+        SwitchButton button = mActivity.findViewById(R.id.button_auto_profile_for_gateway);
+        button.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                mAutoProfileCheck = isChecked;
+            }
+        });
     }
 
     @Override
@@ -134,5 +150,34 @@ public class XiaomiGatewayLight extends BuiltinDevice {
         int rgbValue = brightness << 24 | color;
         rgb.addProperty("rgb", rgbValue);
         gateway.sendDataToDevice(this, rgb);
+    }
+
+    public void executeProfile() {
+        if (!mAutoProfileCheck) {
+            return;
+        }
+        new Thread(() -> {
+            int i = 0;
+            while (i < 7) {
+                int r = (int) (Math.random() * 255);
+                int g = (int) (Math.random() * 255);
+                int b = (int) (Math.random() * 255);
+
+                try {
+                    setBrightness((byte) (10 * i), true);
+                    setColor(r, g, b);
+                } catch (XaapiException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                i++;
+            }
+        }).start();
+
+
     }
 }

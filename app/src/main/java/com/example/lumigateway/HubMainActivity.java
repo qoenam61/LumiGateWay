@@ -19,6 +19,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.XaapiException;
+import com.example.device.BuiltinDevice;
 import com.example.device.SlaveDevice;
 import com.example.device.SmartTv;
 import com.example.device.XiaomiGateway;
@@ -131,6 +132,7 @@ public class HubMainActivity extends AppCompatActivity {
         SeekBar colorR = findViewById(R.id.seekbar_color_r);
         SeekBar colorG = findViewById(R.id.seekbar_color_g);
         SeekBar colorB = findViewById(R.id.seekbar_color_b);
+        SwitchButton profileButton = findViewById(R.id.button_auto_profile_for_gateway);
 
         gatewayInfo.setVisibility(View.INVISIBLE);
         titleBrightness.setVisibility(View.INVISIBLE);
@@ -139,6 +141,7 @@ public class HubMainActivity extends AppCompatActivity {
         colorR.setVisibility(View.INVISIBLE);
         colorG.setVisibility(View.INVISIBLE);
         colorB.setVisibility(View.INVISIBLE);
+        profileButton.setVisibility(View.INVISIBLE);
     }
 
     private XiaomiGateway startGateway(String password) {
@@ -230,6 +233,11 @@ public class HubMainActivity extends AppCompatActivity {
             }
             if (smartTv != null) {
                 smartTv.turnOnTv();
+            }
+
+            XiaomiGatewayLight gatewayLight = mGateway.getBuiltinLight();
+            if (gatewayLight != null) {
+                gatewayLight.executeProfile();
             }
         }
     }

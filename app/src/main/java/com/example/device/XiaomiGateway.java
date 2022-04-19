@@ -26,6 +26,7 @@ import com.example.reply.SlaveDeviceHeartbeat;
 import com.example.reply.WhoisReply;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.kyleduo.switchbutton.SwitchButton;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -75,7 +76,7 @@ public class XiaomiGateway {
     private WhoisReply mWhoisReply;
     private String mPassword;
 
-    private boolean TEST_FOR_APP_DEV = false;
+    private boolean TEST_FOR_APP_DEV = true;
 
     private boolean mCipherComplete = false;
     private XiaomiSocket mTestXiaomiSocket;
@@ -344,6 +345,10 @@ public class XiaomiGateway {
         return builtinLight;
     }
 
+    public Activity getActivity() {
+        return mActivity;
+    }
+
     public XiaomiGatewayIlluminationSensor getBuiltinIlluminationSensor() {
         return builtinIlluminationSensor;
     }
@@ -359,6 +364,7 @@ public class XiaomiGateway {
             SeekBar colorR = deviceGateway.findViewById(R.id.seekbar_color_r);
             SeekBar colorG = deviceGateway.findViewById(R.id.seekbar_color_g);
             SeekBar colorB = deviceGateway.findViewById(R.id.seekbar_color_b);
+            SwitchButton switchButton = deviceGateway.findViewById(R.id.button_auto_profile_for_gateway);
 
             gatewayInfo.setVisibility(View.VISIBLE);
             titleBrightness.setVisibility(View.VISIBLE);
@@ -367,6 +373,7 @@ public class XiaomiGateway {
             colorR.setVisibility(View.VISIBLE);
             colorG.setVisibility(View.VISIBLE);
             colorB.setVisibility(View.VISIBLE);
+            switchButton.setVisibility(View.VISIBLE);
 
 
             XiaomiGatewayLight gatewayLight = getBuiltinLight();

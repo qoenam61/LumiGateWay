@@ -16,15 +16,25 @@
         android:orientation="vertical"
         android:background="@android:color/darker_gray"
         android:padding="5dp">
-        <TextView
-            android:id="@+id/device_gateway_info"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingStart="15dp"
-            android:layout_marginBottom="5dp"
-            android:layout_gravity="start"
-            android:text="Sid : "/>
-
+            android:orientation="horizontal">
+            <TextView
+                android:id="@+id/device_gateway_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:layout_marginBottom="5dp"
+                android:layout_gravity="start"
+                android:text="Sid : "/>
+            <com.kyleduo.switchbutton.SwitchButton
+                android:id="@+id/button_auto_profile_for_gateway"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="120dp"
+                style="@style/SwitchButtonStyle"/>
+        </LinearLayout>
         <TextView
             android:id="@+id/title_brightness"
             android:layout_width="wrap_content"

@@ -100,12 +100,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textStyle="bold"
+            android:visibility="gone"
             android:text="List devices :"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerview_read_device"
             android:layout_width="370dp"
             android:layout_height="wrap_content"
             android:minHeight="100dp"
+            android:visibility="gone"
             android:background="@android:color/darker_gray">
 
         </androidx.recyclerview.widget.RecyclerView>
