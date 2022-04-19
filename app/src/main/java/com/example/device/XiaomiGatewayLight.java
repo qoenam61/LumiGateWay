@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.function.Consumer;
 
 public class XiaomiGatewayLight extends BuiltinDevice {
+    private static final String TAG = "XiaomiGatewayLight";
 
     private byte brightness;
     private byte previousNonZeroBrightness = 100;
@@ -122,7 +123,6 @@ public class XiaomiGatewayLight extends BuiltinDevice {
             previousNonZeroBrightness = this.brightness;
         }
         this.brightness = brightness;
-//        setColor(0x00FFFF); // BLUE
     }
 
     public void setColor(int r, int g, int b) throws XaapiException {
@@ -146,7 +146,6 @@ public class XiaomiGatewayLight extends BuiltinDevice {
     private void writeBrightnessAndColor(byte brightness, int color) throws XaapiException {
         // TODO verify brightness in range 0..100
         JsonObject rgb = new JsonObject();
-//        int rgbValue = brightness << 24;
         int rgbValue = brightness << 24 | color;
         rgb.addProperty("rgb", rgbValue);
         gateway.sendDataToDevice(this, rgb);
@@ -159,13 +158,13 @@ public class XiaomiGatewayLight extends BuiltinDevice {
         new Thread(() -> {
             int i = 0;
             while (i < 7) {
+                byte brightness = (byte) (Math.random() * 100);
                 int r = (int) (Math.random() * 255);
                 int g = (int) (Math.random() * 255);
                 int b = (int) (Math.random() * 255);
 
                 try {
-                    setBrightness((byte) (10 * i), true);
-                    setColor(r, g, b);
+                    writeBrightnessAndColor(brightness, Color.rgb(r, g, b));
                 } catch (XaapiException e) {
                     e.printStackTrace();
                 }

@@ -2,6 +2,7 @@ package com.example.device;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.graphics.Color;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -261,11 +262,19 @@ public class XiaomiGateway {
         builtinLight = new XiaomiGatewayLight(this);
         builtinIlluminationSensor = new XiaomiGatewayIlluminationSensor(this);
 
+        View deviceGateway = mActivity.findViewById(R.id.gateway);
+        SeekBar brightness = deviceGateway.findViewById(R.id.seekbar_brightness);
+        SeekBar colorR = deviceGateway.findViewById(R.id.seekbar_color_r);
+        SeekBar colorG = deviceGateway.findViewById(R.id.seekbar_color_g);
+        SeekBar colorB = deviceGateway.findViewById(R.id.seekbar_color_b);
+
         builtinLight.subscribeForBrightnessChange(new Consumer<Byte>() {
             @Override
             public void accept(Byte aByte) {
                 try {
+                    Log.d(TAG, "subscribeForBrightnessChange accept: " + aByte);
                     builtinLight.setBrightness(aByte, false);
+                    brightness.setProgress(aByte);
                 } catch (XaapiException e) {
                     e.printStackTrace();
                 }
@@ -276,6 +285,12 @@ public class XiaomiGateway {
             @Override
             public void accept(Integer integer) {
                 builtinLight.setColor(integer);
+                int r = Color.red(integer);
+                int g = Color.green(integer);
+                int b = Color.blue(integer);
+                colorR.setProgress(r);
+                colorG.setProgress(g);
+                colorB.setProgress(b);
             }
         });
     }
