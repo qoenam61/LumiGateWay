@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HubMainActivity extends AppCompatActivity {
     private static final String TAG = "HubMainActivity";
-    private static final long REPORT_PERIOD = 1000;
+    private static final long REPORT_PERIOD = 500;
 
     public static final int SHOW_PROGRESS_DIALOG = 1;
     public static final int DISMISS_PROGRESS_DIALOG = 2;
@@ -199,7 +199,7 @@ public class HubMainActivity extends AppCompatActivity {
 
         @Override
         public void onSmartMotionSensor(SlaveDevice device, String s) {
-            Log.d(TAG, "onSmartMotionSensor: " + s + " name: " + XiaomiMotionSensor.Action.Motion.name());
+            Log.d(TAG, "onSmartMotionSensor: " + s );
             if (mEnableAutoProfile && XiaomiMotionSensor.Action.Motion.name().equalsIgnoreCase(s)) {
                 executeAllProfile();
             }

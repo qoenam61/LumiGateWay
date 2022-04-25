@@ -13,7 +13,7 @@ public abstract class SlaveDevice {
         XiaomiSwitchButton,
         TradFriBulb,
         Sensor_HT,
-        Sensor_Motion_AQ2,
+//        Sensor_Motion_AQ2,
         Weather_V1,
         Ctrl_Neutral1,
         Others

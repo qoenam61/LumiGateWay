@@ -77,15 +77,13 @@ public class XiaomiGateway {
     private WhoisReply mWhoisReply;
     private String mPassword;
 
-    private boolean TEST_FOR_APP_DEV = true;
+    private boolean TEST_FOR_APP_DEV = false;
 
     private boolean mCipherComplete = false;
     private XiaomiSocket mTestXiaomiSocket;
     private XiaomiMotionSensor mTestXiaomiMotionSensor;
     private XiaomiDoorWindowSensor mTestXiaomiDoorSensor;
     private TradFriBulb mTestTradfriBulb;
-
-    private ProgressDialog mProgress;
 
     public interface onFoundSubDevice {
         void onSubDevice(String sid, SlaveDevice deviceInfo);
@@ -512,7 +510,7 @@ public class XiaomiGateway {
                 Log.d(TAG, "updateKey - token: " + token + " keyAsHexString: " + keyAsHexString);
                 key = Optional.of(keyAsHexString);
 
-                mHandler.sendEmptyMessage(DISMISS_PROGRESS_DIALOG);
+                mHandler.sendEmptyMessageDelayed(DISMISS_PROGRESS_DIALOG, 1000);
 
             } catch (IllegalBlockSizeException e) {
                 throw new XaapiException("Cipher error: " + e.getMessage());
@@ -624,6 +622,7 @@ public class XiaomiGateway {
                     XiaomiSocket plug = new XiaomiSocket(this, sid, Short.parseShort(reply.short_id));
                     plug.update(reply.data);
                     return plug;
+                case "sensor_motion.aq2":
                 case "motion":
                     XiaomiMotionSensor motion = new XiaomiMotionSensor(this, sid, Short.parseShort(reply.short_id));
                     motion.update(reply.data);
@@ -639,9 +638,6 @@ public class XiaomiGateway {
                 case "sensor_ht":
                     DefaultSlaveDevice sensorHT = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Sensor_HT);
                     return sensorHT;
-                case "sensor_motion.aq2":
-                    DefaultSlaveDevice sensorMotionAq2 = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Sensor_Motion_AQ2);
-                    return sensorMotionAq2;
                 case "weather.v1":
                     DefaultSlaveDevice weatherV1 = new DefaultSlaveDevice(this, sid, SlaveDevice.Type.Weather_V1);
                     return weatherV1;

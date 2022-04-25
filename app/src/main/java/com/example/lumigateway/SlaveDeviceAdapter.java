@@ -57,8 +57,9 @@ public class SlaveDeviceAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view;
-        if (viewType == SlaveDevice.Type.Sensor_Motion_AQ2.ordinal()
-                || viewType == SlaveDevice.Type.XiaomiMotionSensor.ordinal()) {
+        if (viewType == SlaveDevice.Type.XiaomiMotionSensor.ordinal()
+//                || viewType == SlaveDevice.Type.Sensor_Motion_AQ2.ordinal()
+        ) {
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.smart_motion_sendor, parent, false);
             return new SmartMotionSensorViewHolder(view);
         } else if (viewType == SlaveDevice.Type.XiaomiSocket.ordinal()) {

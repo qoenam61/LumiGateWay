@@ -41,16 +41,19 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
                     case "motion":
                         lastAction = Action.Motion;
                         notifyWithMotion();
-                        break;
+                        notifyWithAction(action);
                     default:
+                        Thread.sleep(1000);
                         Log.d(TAG, "update - Unknown action: " + action);
                         lastAction = Action.Unknown;
                         notifyWithMotion();
-//                        throw new XaapiException("Unknown action: " + action);
+                        action = "clear";
+                        notifyWithAction(action);
                 }
-                notifyWithAction(action);
             }
         } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
