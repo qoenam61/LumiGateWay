@@ -51,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
                     android:gravity="center_horizontal"
-                    android:text="Auto Profile"/>
+                    android:text="Automation"/>
                 <com.kyleduo.switchbutton.SwitchButton
                     android:id="@+id/button_auto_profile"
                     android:layout_width="match_parent"

@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HubMainActivity extends AppCompatActivity {
     private static final String TAG = "HubMainActivity";
-    private static final long REPORT_PERIOD = 500;
+    private static final long REPORT_PERIOD = 100;
 
     public static final int SHOW_PROGRESS_DIALOG = 1;
     public static final int DISMISS_PROGRESS_DIALOG = 2;
@@ -171,7 +171,7 @@ public class HubMainActivity extends AppCompatActivity {
 
                 if(mGateway != null && mGateway.getSid() != null) {
                     Log.d(TAG, "onSubDevice - start startReceivingUpdates");
-                    mExecutor = new ThreadPoolExecutor(1, 4, REPORT_PERIOD, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+                    mExecutor = new ThreadPoolExecutor(1, 1, REPORT_PERIOD, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
                     mGateway.startReceivingUpdates(mExecutor);
                     mGateway.addGatewayView(this);
                 }
@@ -201,7 +201,9 @@ public class HubMainActivity extends AppCompatActivity {
         public void onSmartMotionSensor(SlaveDevice device, String s) {
             Log.d(TAG, "onSmartMotionSensor: " + s );
             if (mEnableAutoProfile && XiaomiMotionSensor.Action.Motion.name().equalsIgnoreCase(s)) {
-                executeAllProfile();
+                executeAllProfile(true);
+            } else {
+                executeAllProfile(false);
             }
         }
 
@@ -224,7 +226,8 @@ public class HubMainActivity extends AppCompatActivity {
             this.smartTv = smartTv;
         }
 
-        private void executeAllProfile() {
+        private void executeAllProfile(boolean motion) {
+            Log.d(TAG, "executeAllProfile - motion: " + motion);
             Iterator<SlaveDevice> iterator = myProfile.values().iterator();
             while (iterator.hasNext()) {
                 SlaveDevice device = iterator.next();
@@ -237,7 +240,7 @@ public class HubMainActivity extends AppCompatActivity {
 
             XiaomiGatewayLight gatewayLight = mGateway.getBuiltinLight();
             if (gatewayLight != null) {
-                gatewayLight.executeProfile();
+                gatewayLight.executeProfile(motion);
             }
         }
     }

@@ -14,6 +14,8 @@ import com.kyleduo.switchbutton.SwitchButton;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+import static com.example.device.XiaomiMotionSensor.MOTION_TIME;
+
 public class XiaomiGatewayLight extends BuiltinDevice {
     private static final String TAG = "XiaomiGatewayLight";
 
@@ -151,25 +153,28 @@ public class XiaomiGatewayLight extends BuiltinDevice {
         gateway.sendDataToDevice(this, rgb);
     }
 
-    public void executeProfile() {
+    public void executeProfile(boolean motion) {
         if (!mAutoProfileCheck) {
             return;
         }
         new Thread(() -> {
             int i = 0;
-            while (i < 7) {
+            while (i < 1) {
                 byte brightness = (byte) (Math.random() * 100);
                 int r = (int) (Math.random() * 255);
                 int g = (int) (Math.random() * 255);
                 int b = (int) (Math.random() * 255);
 
                 try {
-                    writeBrightnessAndColor(brightness, Color.rgb(r, g, b));
+
+                    if (motion) {
+                        writeBrightnessAndColor(brightness, Color.rgb(r, g, b));
+                    } else {
+                        setBrightness((byte)0, true);
+                    }
+                    Thread.sleep(MOTION_TIME);
                 } catch (XaapiException e) {
                     e.printStackTrace();
-                }
-                try {
-                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

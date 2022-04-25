@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevice {
     private final static String TAG = "XiaomiMotionSensor";
-
+    public final static int MOTION_TIME = 2000;
     public enum Action {
         Unknown, Motion
     }
@@ -43,7 +43,7 @@ public class XiaomiMotionSensor extends SlaveDevice implements IInteractiveDevic
                         notifyWithMotion();
                         notifyWithAction(action);
                     default:
-                        Thread.sleep(1000);
+                        Thread.sleep(MOTION_TIME);
                         Log.d(TAG, "update - Unknown action: " + action);
                         lastAction = Action.Unknown;
                         notifyWithMotion();

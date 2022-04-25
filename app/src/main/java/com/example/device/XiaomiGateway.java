@@ -509,7 +509,6 @@ public class XiaomiGateway {
                 String keyAsHexString = Utility.toHexString(cipher.doFinal(token.getBytes(StandardCharsets.US_ASCII)));
                 Log.d(TAG, "updateKey - token: " + token + " keyAsHexString: " + keyAsHexString);
                 key = Optional.of(keyAsHexString);
-
                 mHandler.sendEmptyMessageDelayed(DISMISS_PROGRESS_DIALOG, 1000);
 
             } catch (IllegalBlockSizeException e) {
